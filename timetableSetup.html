@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timetable Setup</title>
+    <link rel="stylesheet" href="timetableSetup.css">
+</head>
+<body>
+<div id="setup">
+    <div id="card">
+        <h1>STREAM HUB</h1>
+        <p>
+            Let's personalise your timetable.
+        </p>
+        <div class="upload">
+            <h3>Week 1 Timetable</h3>
+            <input 
+                type="file"
+                id="week1Image"
+                accept="image/*">
+        </div>
+        <div class="upload">
+            <h3>Week 2 Timetable</h3>
+            <input 
+                type="file"
+                id="week2Image"
+                accept="image/*">
+        </div>
+        <button id="continueBtn">
+            Scan Timetable
+        </button>
+        <p id="scanNotice">
+            Wait 10 seconds after clicking Scan Timetable
+        </p>
+        <p id="status"></p>
+    </div>
+</div>
+<script>
+require("./timetableSetup.js")
+</script>
+</body>
+</html>
