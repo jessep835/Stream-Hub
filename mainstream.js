@@ -343,6 +343,11 @@ function createWindow(){
         }
     });
     win.loadFile("stream.html");
+    win.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.key.toLowerCase() === 'w') {
+        event.preventDefault();
+    }
+});
     // CREATE VIEWS
     streamView = new BrowserView({
         webPreferences: { nodeIntegration: false, contextIsolation: true }
