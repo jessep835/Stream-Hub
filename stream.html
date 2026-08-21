@@ -2224,7 +2224,7 @@ const state = {
     focusDone: LS.get('sh_focus', 0),
     streak: LS.get('sh_streak', {count:0, last:''}),
     sessionStart: Date.now(),
-    theme: LS.get('sh_theme', 'cyan'),
+    theme: LS.get('sh_theme', 'pearl'),
     sound: LS.get('sh_sound', true),
     attendance: LS.get('sh_attendance', {
         weekKey: '',
@@ -2343,7 +2343,7 @@ const themes = {
     cornflower: { a:'#7A9FE8', g1:'#7A9FE8', g2:'#354B78', b1:'#354B78', b2:'#0D1320' }
 };
 function applyTheme(name){
-    const t = themes[name] || themes.cyan;
+    const t = themes[name] || themes.pearl;
     document.documentElement.style.setProperty('--accent', t.a);
     document.documentElement.style.setProperty('--accent-soft', t.a + '26');
     document.documentElement.style.setProperty('--accent-glow', t.a + '80');
