@@ -1,24 +1,18 @@
-const fs = require("fs");
-const path = require("path");
-const {ipcRenderer} = require("electron");
-const profilePath = path.join(
-    __dirname,
-    "profile.json"
-);
-document.getElementById("save").onclick = ()=>{
+const { ipcRenderer } = require("electron");
+document.getElementById("save").onclick = async () => {
     const a = document.getElementById("pin1").value;
     const b = document.getElementById("pin2").value;
-    if(a.length !== 4 || a !== b){
+    if (a.length !== 4 || a !== b) {
         alert("PINs don't match");
         return;
     }
-    const profile = JSON.parse(
-        fs.readFileSync(profilePath)
+    const saved = await ipcRenderer.invoke(
+        "save-pin",
+        a
     );
-    profile.pin = a;
-    fs.writeFileSync(
-        profilePath,
-        JSON.stringify(profile,null,4)
-    );
+    if (!saved) {
+        alert("Could not save PIN. Restart Stream Hub.");
+        return;
+    }
     ipcRenderer.send("pin-created");
 };

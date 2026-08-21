@@ -1,36 +1,37 @@
-const fs = require("fs");
-const path = require("path");
 const { ipcRenderer } = require("electron");
-const profilePath = path.join(__dirname, "profile.json");
 const nameInput = document.getElementById("nameInput");
 const continueBtn = document.getElementById("continueBtn");
-continueBtn.onclick = () => {
+continueBtn.onclick = async () => {
     const name = nameInput.value.trim();
-    if(!name){
+    if (!name) {
         nameInput.style.boxShadow = "0 0 20px red";
         return;
     }
     const profile = {
-        name:name,
-        setupComplete:true,
-        pin:null,
-        created:new Date().toISOString(),
-        settings:{
-            theme:"cyan",
-            sound:true
+        name: name,
+        setupComplete: true,
+        pin: null,
+        created: new Date().toISOString(),
+        settings: {
+            theme: "cyan",
+            sound: true
         }
     };
-    fs.writeFileSync(
-        profilePath,
-        JSON.stringify(profile,null,4)
+    const saved = await ipcRenderer.invoke(
+        "save-profile",
+        profile
     );
-    continueBtn.innerHTML="Loading STREAM HUB...";
-    setTimeout(()=>{
+    if (!saved) {
+        continueBtn.innerHTML = "Save Failed — Try Again";
+        return;
+    }
+    continueBtn.innerHTML = "Loading STREAM HUB...";
+    setTimeout(() => {
         ipcRenderer.send("setup-complete");
-    },1000);
+    }, 500);
 };
-nameInput.addEventListener("keydown",e=>{
-    if(e.key==="Enter"){
+nameInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
         continueBtn.click();
     }
 });

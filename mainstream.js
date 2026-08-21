@@ -4,6 +4,12 @@ const { autoUpdater } = require("electron-updater");
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const userDataPath = app.getPath("userData");
+if (!fs.existsSync(userDataPath)) {
+    fs.mkdirSync(userDataPath, { recursive: true });
+}
+const profilePath = path.join(userDataPath, "profile.json");
+const timetablePath = path.join(userDataPath, "streamTimetable.json");
 let win;
 let lockWindow;
 // views
@@ -73,10 +79,6 @@ function toggleApp(appName, url){
     showView(appName);
 }
 function hasPIN(){
-    const profilePath = path.join(
-        __dirname,
-        "profile.json"
-    );
     if(!fs.existsSync(profilePath)){
         return false;
     }
@@ -89,10 +91,6 @@ function hasPIN(){
     );
 }
 function hasTimetable(){
-    const timetablePath = path.join(
-        __dirname,
-        "streamTimetable.json"
-    );
     if (!fs.existsSync(timetablePath)) {
         return false;
     }
@@ -175,6 +173,43 @@ function createLockWindow() {
         console.error("Description:", description);
     });
 }
+ipcMain.handle("save-profile", async (event, profile) => {
+    try {
+        fs.mkdirSync(userDataPath, { recursive: true });
+        fs.writeFileSync(
+            profilePath,
+            JSON.stringify(profile, null, 4),
+            "utf8"
+        );
+        console.log("✅ PROFILE SAVED:", profilePath);
+        return true;
+    } catch (err) {
+        console.error("❌ FAILED TO SAVE PROFILE:", err);
+        return false;
+    }
+});
+ipcMain.handle("save-pin", async (event, pin) => {
+    try {
+        if (!fs.existsSync(profilePath)) {
+            console.error("❌ PROFILE DOES NOT EXIST:", profilePath);
+            return false;
+        }
+        const profile = JSON.parse(
+            fs.readFileSync(profilePath, "utf8")
+        );
+        profile.pin = pin;
+        fs.writeFileSync(
+            profilePath,
+            JSON.stringify(profile, null, 4),
+            "utf8"
+        );
+        console.log("✅ PIN SAVED:", profilePath);
+        return true;
+    } catch (err) {
+        console.error("❌ FAILED TO SAVE PIN:", err);
+        return false;
+    }
+});
 ipcMain.on("unlock", () => {
     if (lockWindow) {
         lockWindow.close();
@@ -184,10 +219,6 @@ ipcMain.on("unlock", () => {
 });
 console.log("REGISTERING OCR HANDLER");
 ipcMain.handle("load-timetable", () => {
-    const timetablePath = path.join(
-        __dirname,
-        "streamTimetable.json"
-    );
     if(fs.existsSync(timetablePath)){
         return JSON.parse(
             fs.readFileSync(timetablePath, "utf8")
@@ -211,13 +242,11 @@ ipcMain.handle("save-timetable", async (event, data) => {
   console.log("🔥 SAVE HANDLER RECEIVED");
   const { buildTimetable } = require("./timetableBuilder");
   const parsed = buildTimetable(data);
-  const timetablePath = path.join(__dirname, "streamTimetable.json");
   fs.writeFileSync(timetablePath, JSON.stringify(parsed, null, 2));
   console.log("✅ SAVED PARSED TIMETABLE");
   return true;
 });
 ipcMain.handle("get-timetable", async () => {
-    const timetablePath = path.join(__dirname, "streamTimetable.json");
     if (!fs.existsSync(timetablePath)) {
         return null;
     }
@@ -238,21 +267,13 @@ ipcMain.on("timetable-complete",()=>{
     createLockWindow();
 });
 function checkSetup(){
-    const profile = path.join(
-        __dirname,
-        "profile.json"
-    );
-    if(!fs.existsSync(profile)){
+    if(!fs.existsSync(profilePath)){
         createSetupWindow();
         return false;
     }
     return true;
 }
 function hasCompletedSetup(){
-    const profilePath = path.join(
-        __dirname,
-        "profile.json"
-    );
     if(!fs.existsSync(profilePath)){
         return false;
     }
@@ -363,14 +384,18 @@ setInterval(() => {
         app.quit();
     });
     ipcMain.handle("get-profile", () => {
-    const profilePath = path.join(__dirname, "profile.json");
-    if (fs.existsSync(profilePath)) {
-        return JSON.parse(
-            fs.readFileSync(profilePath, "utf8")
-        );
-    }
-    return {};
-});
+        try {
+            if (fs.existsSync(profilePath)) {
+                return JSON.parse(
+                    fs.readFileSync(profilePath, "utf8")
+                );
+            }
+            return {};
+        }  catch (err) {
+            console.error("❌ FAILED TO LOAD PROFILE:", err);
+            return {};
+        }
+    });
     ipcMain.on("open-vpn", () => {
         openVPN();
     });

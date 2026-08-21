@@ -1892,24 +1892,24 @@ img {
         <div class="cardIcon">✦</div>
     </div>
     <div class="creditsMain">
-        <div class="bigNumber" id="creditsValue">24<span>/60</span></div>
-        <div class="creditPercent" id="creditsPercent">40%</div>
+        <div class="bigNumber" id="creditsValue">0<span>/60</span></div>
+        <div class="creditPercent" id="creditsPercent">0%</div>
     </div>
     <div class="progressBar">
         <div class="progressFill" id="creditsProgress" style="width:40%"></div>
     </div>
     <div class="creditsMeta">
-        <span id="creditsRemaining">36 to go to pass the year</span>
-        <span id="creditsEarned">24 earned</span>
+        <span id="creditsRemaining">60 to go to pass the year</span>
+        <span id="creditsEarned">0 earned</span>
     </div>
     <div class="creditsMeta" style="margin-top:4px;">
-        <span id="creditsEndorsement">26 more Excellence credits to endorse</span>
+        <span id="creditsEndorsement">50 more Excellence credits to endorse</span>
     </div>
     <div class="creditsBreakdown">
         <div>
             <span class="creditDot excellence"></span>
             <span>Excellence</span>
-            <strong id="excellenceCredits" class="creditValueDisplay">24</strong>
+            <strong id="excellenceCredits" class="creditValueDisplay">0</strong>
             <button class="creditEditBtn" onclick="editCreditsField('excellence')" title="Edit">✎</button>
         </div>
         <div>
@@ -2237,7 +2237,7 @@ const state = {
         }
     }),
     credits: LS.get('sh_credits', {
-        excellence: 24,
+        excellence: 0,
         merit: 0,
         achieved: 0
     })
@@ -5495,6 +5495,23 @@ function runAIBoot(){
         beep(1400, 0.18);
     }, 3000);
 }
+let currentUserProfile = {
+    name: "User"
+};
+async function loadUserProfile() {
+    try {
+        const profile = await ipcRenderer.invoke("get-profile");
+        if (profile && profile.name) {
+            currentUserProfile = profile;
+        }
+        console.log("🤖 AI PROFILE LOADED:", currentUserProfile);
+    } catch (err) {
+        console.error("❌ AI PROFILE LOAD FAILED:", err);
+    }
+}
+function getUserName() {
+    return currentUserProfile?.name || "User";
+}
 function buildSystemPrompt(){
     const AI_USER_NAME = getUserName();
     const now = new Date();
@@ -5686,8 +5703,15 @@ function aiBotSay(text, delay=null){
 function tryLocalResponse(raw){
     const q = raw.trim(), lq = q.toLowerCase();
     // Greetings
-    if(/^(hi|hello|hey|yo|sup|kia ora)\b/i.test(lq))
-        return pick(["Hey! What's up?","Hey ${AI_USER_NAME} 👋 What can I help with?","Yo! Ask me anything."]);
+    if(/^(hi|hello|hey|yo|sup|kia ora)\b/i.test(lq)) {
+    const name = getUserName();
+    return pick([
+        "Hey! What's up?",
+        `Hey ${name} 👋 What can I help with?`,
+        "Yo! Ask me anything.",
+        "Chur bro! What's up?"
+    ]);
+}
     // Maths — evaluate expressions instantly
     const mt = tryMath(q);
     if(mt) return mt;

@@ -1,20 +1,20 @@
-const fs = require("fs");
-const path = require("path");
-const profilePath = path.join(__dirname, "profile.json");
+const { ipcRenderer } = require("electron");
 let userProfile = {
-    name:"User"
+    name: "User"
 };
-if(fs.existsSync(profilePath)){
-    userProfile = JSON.parse(
-        fs.readFileSync(profilePath)
-    );
-}
-window.userProfile = userProfile;
-window.addEventListener("DOMContentLoaded",()=>{
-    const name = userProfile.name;
+(async () => {
+    try {
+        const profile = await ipcRenderer.invoke("get-profile");
+        if (profile && profile.name) {
+            userProfile = profile;
+        }
+    } catch (err) {
+        console.error("❌ FAILED TO LOAD PROFILE:", err);
+    }
+    window.userProfile = userProfile;
     document.querySelectorAll("[data-user-name]")
-    .forEach(el=>{
-        el.innerText = name;
-    });
-    document.title = `STREAM HUB - ${name}`;
-});
+        .forEach(el => {
+            el.innerText = userProfile.name;
+        });
+    document.title = `STREAM HUB - ${userProfile.name}`;
+})();
