@@ -156,6 +156,8 @@ function createLockWindow() {
         resizable: false,
         frame: false,
         alwaysOnTop: true,
+        icon: path.join(__dirname, "assets-2", "schoollogo.ico"),
+        title: "Stream Hub",
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false

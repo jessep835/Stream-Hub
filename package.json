@@ -34,7 +34,8 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.11.2",
     "@electron-forge/plugin-fuses": "^7.11.2",
     "@electron/fuses": "^1.8.0",
-    "electron": "^41.7.1"
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
