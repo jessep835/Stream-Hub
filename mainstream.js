@@ -417,7 +417,7 @@ setInterval(() => {
 // ============================================================
 function setupAutoUpdater() {
     autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.autoInstallOnAppQuit = false;
     autoUpdater.on("checking-for-update", () => {
         console.log("🔄 STREAM HUB: Checking for updates...");
     });
@@ -441,7 +441,6 @@ function setupAutoUpdater() {
     });
     autoUpdater.on("update-downloaded", (info) => {
     console.log("✅ STREAM HUB: Update downloaded:", info.version);
-
     if (win && !win.isDestroyed()) {
         win.webContents.send("update-downloaded", {
             version: info.version
