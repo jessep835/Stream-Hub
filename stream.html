@@ -2328,6 +2328,23 @@ try{
 }catch(err){
     /* Not running inside Electron — that's fine, we fall back to localStorage. */
 }
+console.log("🧪 UPDATE SYSTEM TEST");
+console.log("ipcRenderer exists:", !!ipcRenderer);
+
+if (ipcRenderer) {
+    ipcRenderer.on("update-downloaded", (event, info) => {
+        console.log("🧪 STREAM.HTML RECEIVED update-downloaded:", info);
+
+        const popup = document.getElementById("updatePopup");
+
+        console.log("🧪 Popup element:", popup);
+
+        if (popup) {
+            popup.style.display = "flex";
+            console.log("🧪 POPUP SHOULD NOW BE VISIBLE");
+        }
+    });
+}
 window.onerror = function(msg, src, line){
     console.log("JS ERROR:", msg, line);
 };
@@ -7025,6 +7042,54 @@ async function askStockAI(sym){
         const text = d.choices?.[0]?.message?.content || 'No response.';
         slot.innerHTML = `<div class="aiInsight"><div class="aiHead2"><span class="aiPulse"></span> STREAM AI · ${escapeHtml(q.slice(0,40))}</div><div class="aiInsightBody">${formatBot(text)}</div></div>`;
     }catch(e){ slot.innerHTML = '<div class="aiInsight"><div class="aiInsightBody">Error: '+e.message+'</div></div>'; }
+}
+// ============================================================
+// STREAM HUB UPDATE POPUP
+// ============================================================
+
+const updatePopup = document.getElementById("updatePopup");
+const updateVersion = document.getElementById("updateVersion");
+const updateNowBtn = document.getElementById("updateNowBtn");
+const updateLaterBtn = document.getElementById("updateLaterBtn");
+
+// Update is available
+if (ipcRenderer) {
+    ipcRenderer.on("update-available", (event, info) => {
+        console.log("🚀 UPDATE AVAILABLE:", info.version);
+
+        updateVersion.textContent = `Version ${info.version} is available`;
+
+        // Don't show yet — wait until the download finishes.
+    });
+
+    // Download progress
+    ipcRenderer.on("update-progress", (event, info) => {
+        console.log("⬇️ UPDATE PROGRESS:", info.percent);
+
+        updateVersion.textContent =
+            `Downloading update... ${Math.round(info.percent)}%`;
+    });
+
+    // Download finished
+    ipcRenderer.on("update-downloaded", (event, info) => {
+        console.log("✅ UPDATE DOWNLOADED:", info.version);
+
+        updateVersion.textContent =
+            `Version ${info.version} is ready`;
+
+        updatePopup.style.display = "flex";
+    });
+
+    // Restart & install
+    updateNowBtn.addEventListener("click", () => {
+        console.log("🔄 RESTARTING TO INSTALL UPDATE...");
+        ipcRenderer.send("install-update");
+    });
+
+    // Later
+    updateLaterBtn.addEventListener("click", () => {
+        updatePopup.style.display = "none";
+    });
 }
 /* ---- Auto-refresh while panel open ---- */
 setInterval(()=>{
