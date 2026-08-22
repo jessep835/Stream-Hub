@@ -1,4 +1,5 @@
 console.log("🔥 MAINSTREAM LOADED");
+console.log("🔥 RUNNING VERSION:", app.getVersion());
 const { app, BrowserWindow, BrowserView, ipcMain, screen  } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const { exec } = require("child_process");
