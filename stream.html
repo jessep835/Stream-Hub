@@ -1508,6 +1508,103 @@ img {
 .sidebar .collapse-btn {
     box-sizing: border-box;
 }
+/* ============================================================
+   STREAM HUB UPDATE POPUP
+============================================================ */
+.update-popup-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    z-index: 999999;
+}
+.update-popup {
+    width: 430px;
+    padding: 35px;
+    border-radius: 24px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.55),
+        0 0 40px rgba(59, 130, 246, 0.12);
+    text-align: center;
+    animation: updatePopupIn 0.35s ease;
+}
+@keyframes updatePopupIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+.update-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-size: 34px;
+    font-weight: 700;
+}
+.update-title {
+    color: white;
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.update-version {
+    color: #60a5fa;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+.update-message {
+    color: #94a3b8;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+.update-buttons {
+    display: flex;
+    gap: 12px;
+}
+.update-now-btn,
+.update-later-btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+.update-now-btn {
+    background: #2563eb;
+    color: white;
+}
+.update-now-btn:hover {
+    background: #3b82f6;
+    transform: translateY(-1px);
+}
+.update-later-btn {
+    background: rgba(255, 255, 255, 0.07);
+    color: #cbd5e1;
+}
+.update-later-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
 /* ===== STREAM AI ===== */
 #aiOverlay{position:fixed;inset:0;background:rgba(0,5,15,.75);backdrop-filter:blur(8px);z-index:9999;display:none;justify-content:center;align-items:center;animation:fadeIn .25s;}
 #aiOverlay.show{display:flex;}
@@ -2192,6 +2289,34 @@ img {
             ✕
         </button>
         <div id="ttEditorContent"></div>
+    </div>
+</div>
+<!-- ============================================================
+     STREAM HUB UPDATE POPUP
+============================================================ -->
+<div id="updatePopup" class="update-popup-overlay">
+    <div class="update-popup">
+        <div class="update-icon">
+            ↻
+        </div>
+        <div class="update-title">
+            Stream Hub Updated
+        </div>
+        <div class="update-version" id="updateVersion">
+            A new version is ready
+        </div>
+        <div class="update-message">
+            Your update has finished downloading.
+            Restart Stream Hub to install it.
+        </div>
+        <div class="update-buttons">
+            <button id="updateNowBtn" class="update-now-btn">
+                Restart & Update
+            </button>
+            <button id="updateLaterBtn" class="update-later-btn">
+                Later
+            </button>
+        </div>
     </div>
 </div>
 <script>

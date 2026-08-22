@@ -440,13 +440,18 @@ function setupAutoUpdater() {
         }
     });
     autoUpdater.on("update-downloaded", (info) => {
-        console.log("✅ STREAM HUB: Update downloaded:", info.version);
-        if (win && !win.isDestroyed()) {
-            win.webContents.send("update-downloaded", {
-                version: info.version
-            });
-        }
-    });
+    console.log("✅ STREAM HUB: Update downloaded:", info.version);
+
+    if (win && !win.isDestroyed()) {
+        win.webContents.send("update-downloaded", {
+            version: info.version
+        });
+    }
+});
+ipcMain.on("install-update", () => {
+    console.log("🔄 STREAM HUB: Installing update...");
+    autoUpdater.quitAndInstall();
+});
     autoUpdater.on("update-not-available", () => {
         console.log("✅ STREAM HUB: Already up to date.");
     });
