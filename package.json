@@ -1,6 +1,6 @@
 {
   "name": "stream",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "mainstream.js",
   "description": "Stream Hub",
   "author": "Jesse Penman",
@@ -13,19 +13,30 @@
     "make": "electron-forge make"
   },
   "build": {
-    "appId": "com.streamhub.app",
-    "productName": "Stream Hub",
-    "win": {
-      "target": "nsis",
-      "icon": "assets-2/schoollogo.ico"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "jessep835",
-      "repo": "Stream-Hub",
-      "releaseType": "release"
-    }
+  "appId": "com.streamhub.app",
+  "productName": "Stream Hub",
+  "win": {
+    "target": "nsis",
+    "icon": "assets-2/schoollogo.ico"
   },
+  "mac": {
+  "icon": "assets-2/schoollogo.icns",
+  "target": [
+    {
+      "target": "dmg",
+      "arch": ["universal"]
+    }
+  ],
+  "category": "public.app-category.education",
+  "identity": "-"
+},
+  "publish": {
+    "provider": "github",
+    "owner": "jessep835",
+    "repo": "Stream-Hub",
+    "releaseType": "release"
+  }
+},
   "devDependencies": {
     "@electron-forge/cli": "^7.11.2",
     "@electron-forge/maker-deb": "^7.11.2",

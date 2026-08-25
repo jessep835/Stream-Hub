@@ -105,9 +105,13 @@ function hasTimetable(){
     }
 }
 function openVPN(){
-    exec(
-        'explorer.exe shell:AppsFolder\\29645FreeConnectedLimited.X-VPN-FreeUnlimitedVPNPr_qjvpctbgym0d0!App'
-    );
+    if (process.platform === "win32") {
+        exec(
+            'explorer.exe shell:AppsFolder\\29645FreeConnectedLimited.X-VPN-FreeUnlimitedVPNPr_qjvpctbgym0d0!App'
+        );
+    } else if (process.platform === "darwin") {
+        console.log("VPN launch not configured for macOS");
+    }
 }
 let timetableWindow;
 function openTimetableSetup(){
