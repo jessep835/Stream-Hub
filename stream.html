@@ -509,16 +509,16 @@ img {
     visibility:hidden;
     pointer-events:none;
 }
-#cursor{
-    position:fixed;
-    width:18px;
-    height:18px;
-    border:2px solid white;
-    border-radius:50%;
-    transform:translate(-50%,-50%);
-    pointer-events:none;
-    z-index:999998;
-    mix-blend-mode:difference;
+#cursor {
+    position: fixed;
+    width: 18px;
+    height: 18px;
+    border: 2px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2147483647 !important;
+    mix-blend-mode: difference;
     box-shadow:
         0 0 10px white,
         0 0 20px white;
@@ -1605,6 +1605,190 @@ img {
 .update-later-btn:hover {
     background: rgba(255, 255, 255, 0.12);
 }
+/* ============================================================
+   CUSTOM THEME EDITOR
+============================================================ */
+.custom-theme-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(12px);
+    z-index: 999990;
+}
+.custom-theme-overlay.show {
+    display: flex;
+}
+.custom-theme-panel {
+    width: 560px;
+    padding: 28px;
+    border-radius: 22px;
+    background: #09090b;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.7),
+        0 0 50px rgba(255,255,255,.04);
+}
+.custom-theme-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+.custom-theme-title {
+    color: white;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: .5px;
+}
+.custom-theme-sub {
+    margin-top: 5px;
+    color: #71717a;
+    font-size: 13px;
+}
+.custom-theme-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    color: #a1a1aa;
+    cursor: pointer;
+    font-size: 16px;
+}
+.custom-theme-close:hover {
+    background: rgba(255,255,255,.12);
+    color: white;
+}
+/* PREVIEW */
+.custom-theme-preview {
+    height: 190px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        linear-gradient(
+            135deg,
+            var(--custom-bg),
+            var(--custom-gradient)
+        );
+    border: 1px solid var(--custom-accent);
+    box-shadow:
+        inset 0 0 40px rgba(0,0,0,.25),
+        0 0 25px color-mix(
+            in srgb,
+            var(--custom-accent) 25%,
+            transparent
+        );
+    margin-bottom: 24px;
+}
+.custom-theme-preview-inner {
+    text-align: center;
+}
+.custom-theme-preview-title {
+    color: white;
+    font-size: 28px;
+    font-weight: 900;
+}
+.custom-theme-preview-sub {
+    margin-top: 6px;
+    color: rgba(255,255,255,.55);
+    font-size: 13px;
+}
+.custom-theme-preview-btn {
+    margin-top: 18px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid var(--custom-accent);
+    background: color-mix(
+        in srgb,
+        var(--custom-accent) 18%,
+        transparent
+    );
+    color: white;
+    font-weight: 700;
+}
+/* CONTROLS */
+.custom-theme-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.custom-theme-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 13px;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.07);
+}
+.custom-theme-control label {
+    color: #d4d4d8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+.custom-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.custom-color-row input[type="color"] {
+    width: 42px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+.custom-color-row input[type="text"] {
+    width: 100px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(0,0,0,.35);
+    color: white;
+    padding: 0 9px;
+    font-family: monospace;
+    font-size: 12px;
+}
+/* BUTTONS */
+.custom-theme-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+.custom-theme-reset,
+.custom-theme-apply {
+    flex: 1;
+    height: 46px;
+    border: none;
+    border-radius: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.custom-theme-reset {
+    background: rgba(255,255,255,.06);
+    color: #a1a1aa;
+}
+.custom-theme-apply {
+    background: var(--custom-accent);
+    color: white;
+    box-shadow:
+        0 0 20px color-mix(
+            in srgb,
+            var(--custom-accent) 30%,
+            transparent
+        );
+}
+.custom-theme-reset:hover,
+.custom-theme-apply:hover {
+    transform: translateY(-1px);
+}
 /* ===== STREAM AI ===== */
 #aiOverlay{position:fixed;inset:0;background:rgba(0,5,15,.75);backdrop-filter:blur(8px);z-index:9999;display:none;justify-content:center;align-items:center;animation:fadeIn .25s;}
 #aiOverlay.show{display:flex;}
@@ -2292,6 +2476,119 @@ img {
     </div>
 </div>
 <!-- ============================================================
+     CUSTOM THEME EDITOR
+============================================================ -->
+<div id="customThemeOverlay" class="custom-theme-overlay">
+    <div class="custom-theme-panel">
+
+        <div class="custom-theme-head">
+            <div>
+                <div class="custom-theme-title">CUSTOM THEME</div>
+                <div class="custom-theme-sub">Build your own Stream Hub colour scheme</div>
+            </div>
+
+            <button
+                class="custom-theme-close"
+                onclick="closeCustomTheme()"
+            >✕</button>
+        </div>
+
+        <div class="custom-theme-preview" id="customThemePreview">
+            <div class="custom-theme-preview-inner">
+                <div class="custom-theme-preview-title">
+                    STREAM HUB
+                </div>
+                <div class="custom-theme-preview-sub">
+                    Custom theme preview
+                </div>
+                <button class="custom-theme-preview-btn">
+                    PREVIEW
+                </button>
+            </div>
+        </div>
+
+        <div class="custom-theme-controls">
+
+            <div class="custom-theme-control">
+                <label>BACKGROUND</label>
+
+                <div class="custom-color-row">
+                    <input
+                        type="color"
+                        id="customBgColor"
+                        value="#020617"
+                    >
+
+                    <input
+                        type="text"
+                        id="customBgHex"
+                        value="#020617"
+                        maxlength="7"
+                    >
+                </div>
+            </div>
+
+            <div class="custom-theme-control">
+                <label>ACCENT</label>
+
+                <div class="custom-color-row">
+                    <input
+                        type="color"
+                        id="customAccentColor"
+                        value="#3b82f6"
+                    >
+
+                    <input
+                        type="text"
+                        id="customAccentHex"
+                        value="#3b82f6"
+                        maxlength="7"
+                    >
+                </div>
+            </div>
+
+            <div class="custom-theme-control">
+                <label>GRADIENT</label>
+
+                <div class="custom-color-row">
+                    <input
+                        type="color"
+                        id="customGradientColor"
+                        value="#0f172a"
+                    >
+
+                    <input
+                        type="text"
+                        id="customGradientHex"
+                        value="#0f172a"
+                        maxlength="7"
+                    >
+                </div>
+            </div>
+
+        </div>
+
+        <div class="custom-theme-actions">
+
+            <button
+                class="custom-theme-reset"
+                onclick="resetCustomTheme()"
+            >
+                RESET
+            </button>
+
+            <button
+                class="custom-theme-apply"
+                onclick="applyCustomTheme()"
+            >
+                APPLY THEME
+            </button>
+
+        </div>
+
+    </div>
+</div>
+<!-- ============================================================
      STREAM HUB UPDATE POPUP
 ============================================================ -->
 <div id="updatePopup" class="update-popup-overlay">
@@ -2441,6 +2738,7 @@ const themes = {
     velvet:     { a:'#8B5CF6', g1:'#8B5CF6', g2:'#351866', b1:'#351866', b2:'#0C0618' },
     dusk:       { a:'#FF8FAB', g1:'#FF8FAB', g2:'#5B2148', b1:'#241022', b2:'#08030A' },
     void:       { a:'#00FFFF', g1:'#00FFFF', g2:'#111827', b1:'#111827', b2:'#020617' },
+    laser:    { a:'#ff2020', g1:'#ff2020', g2:'#3d0000',b1: '#3d0000', b2:'#080000' },
     graphite:   { a:'#C7CDD6', g1:'#C7CDD6', g2:'#3A4048', b1:'#3A4048', b2:'#14171B' },
     turquoise:  { a:'#20CFCF', g1:'#20CFCF', g2:'#064B4B', b1:'#064B4B', b2:'#021818' },
     teal:       { a:'#2DD4BF', g1:'#2DD4BF', g2:'#075E56', b1:'#075E56', b2:'#031A18' },
@@ -2482,9 +2780,19 @@ const themes = {
     coastal:    { a:'#4FB7B2', g1:'#4FB7B2', g2:'#1B5250', b1:'#1B5250', b2:'#071716' },
     deepTeal:   { a:'#159A9C', g1:'#159A9C', g2:'#064C4D', b1:'#064C4D', b2:'#021717' },
     royalblue:  { a:'#5684E8', g1:'#5684E8', g2:'#263D75', b1:'#263D75', b2:'#0A1020' },
-    cornflower: { a:'#7A9FE8', g1:'#7A9FE8', g2:'#354B78', b1:'#354B78', b2:'#0D1320' }
+    cornflower: { a:'#7A9FE8', g1:'#7A9FE8', g2:'#354B78', b1:'#354B78', b2:'#0D1320' },
+    custom:     { a: customTheme.accent, g1: customTheme.accent, g2: customTheme.gradient, b1: customTheme.gradient, b2: customTheme.bg },
 };
 function applyTheme(name){
+    if(name === 'custom'){
+    themes.custom = {
+        a: customTheme.accent,
+        g1: customTheme.accent,
+        g2: customTheme.gradient,
+        b1: customTheme.gradient,
+        b2: customTheme.bg
+    };
+}
     const t = themes[name] || themes.pearl;
     document.documentElement.style.setProperty('--accent', t.a);
     document.documentElement.style.setProperty('--accent-soft', t.a + '26');
@@ -2506,6 +2814,150 @@ document.querySelectorAll('.themeDot').forEach(d=>{
     d.onclick = () => { applyTheme(d.dataset.theme); beep(880); };
 });
 applyTheme(state.theme);
+/* ============================================================
+   CUSTOM THEME SYSTEM
+============================================================ */
+
+const DEFAULT_CUSTOM_THEME = {
+    bg: '#020617',
+    accent: '#3b82f6',
+    gradient: '#0f172a'
+};
+
+let customTheme = {
+    ...DEFAULT_CUSTOM_THEME,
+    ...(LS.get('customTheme', {}) || {})
+};
+
+function openCustomTheme(){
+
+    const overlay = document.getElementById('customThemeOverlay');
+
+    if(!overlay) return;
+
+    document.getElementById('customBgColor').value =
+        customTheme.bg;
+
+    document.getElementById('customBgHex').value =
+        customTheme.bg;
+
+    document.getElementById('customAccentColor').value =
+        customTheme.accent;
+
+    document.getElementById('customAccentHex').value =
+        customTheme.accent;
+
+    document.getElementById('customGradientColor').value =
+        customTheme.gradient;
+
+    document.getElementById('customGradientHex').value =
+        customTheme.gradient;
+
+    updateCustomThemePreview();
+
+    overlay.classList.add('show');
+
+    beep(900);
+}
+
+function closeCustomTheme(){
+
+    const overlay =
+        document.getElementById('customThemeOverlay');
+
+    if(!overlay) return;
+
+    overlay.classList.remove('show');
+
+    beep(500);
+}
+
+function updateCustomThemePreview(){
+
+    const bg =
+        document.getElementById('customBgColor').value;
+
+    const accent =
+        document.getElementById('customAccentColor').value;
+
+    const gradient =
+        document.getElementById('customGradientColor').value;
+
+    const preview =
+        document.getElementById('customThemePreview');
+
+    preview.style.setProperty('--custom-bg', bg);
+    preview.style.setProperty('--custom-accent', accent);
+    preview.style.setProperty('--custom-gradient', gradient);
+}
+/* COLOR PICKERS */
+document.addEventListener('DOMContentLoaded', ()=>{
+    const pairs = [
+        ['customBgColor','customBgHex'],
+        ['customAccentColor','customAccentHex'],
+        ['customGradientColor','customGradientHex']
+    ];
+    pairs.forEach(([picker,hex])=>{
+        const p = document.getElementById(picker);
+        const h = document.getElementById(hex);
+        if(!p || !h) return;
+        p.addEventListener('input', ()=>{
+            h.value = p.value;
+            updateCustomThemePreview();
+        });
+        h.addEventListener('input', ()=>{
+            let value = h.value.trim();
+            if(!value.startsWith('#')){
+                value = '#' + value;
+            }
+            if(/^#[0-9a-fA-F]{6}$/.test(value)){
+                p.value = value;
+                updateCustomThemePreview();
+            }
+        });
+    });
+});
+/* APPLY */
+function applyCustomTheme(){
+    const bg =
+        document.getElementById('customBgColor').value;
+    const accent =
+        document.getElementById('customAccentColor').value;
+    const gradient =
+        document.getElementById('customGradientColor').value;
+    customTheme = {
+        bg,
+        accent,
+        gradient
+    };
+    LS.set('customTheme', customTheme);
+    applyTheme('custom');
+    closeCustomTheme();
+    toast('Custom theme applied');
+    beep(1100);
+}
+/* RESET */
+function resetCustomTheme(){
+    customTheme = {
+        ...DEFAULT_CUSTOM_THEME
+    };
+    LS.set('customTheme', customTheme);
+    document.getElementById('customBgColor').value =
+        customTheme.bg;
+    document.getElementById('customBgHex').value =
+        customTheme.bg;
+    document.getElementById('customAccentColor').value =
+        customTheme.accent;
+    document.getElementById('customAccentHex').value =
+        customTheme.accent;
+    document.getElementById('customGradientColor').value =
+        customTheme.gradient;
+    document.getElementById('customGradientHex').value =
+        customTheme.gradient;
+    updateCustomThemePreview();
+    toast('Custom theme reset');
+    beep(500);
+}
 /* ---------- SOUND ---------- */
 let audioCtx;
 function beep(freq=600, dur=0.08, type='sine', vol=0.05){
@@ -4871,6 +5323,7 @@ const commands = [
     {label:'Reset Focus Timer', kbd:'', run:focusReset},
     {label:'Jump to Notes', kbd:'N', run:()=>{ notesEl.focus(); notesEl.scrollIntoView({behavior:'smooth'}); }},
     {label:'Add Assignment', kbd:'A', run:()=>document.getElementById('assignInput').focus()},
+    {label:'Custom Theme', kbd:'', run:()=>openCustomTheme()},
     {label:'Theme: Cyan', kbd:'', run:()=>applyTheme('cyan')},
     {label:'Theme: Magenta', kbd:'', run:()=>applyTheme('magenta')},
     {label:'Theme: Lime', kbd:'', run:()=>applyTheme('lime')},
@@ -4943,6 +5396,7 @@ const commands = [
     {label:'Theme: Royal Blue', kbd:'', run:()=>applyTheme('royalblue')},
     {label:'Theme: Cornflower', kbd:'', run:()=>applyTheme('cornflower')},
     {label:'Theme: Void', kbd:'', run:()=>applyTheme('void')},
+    {label:'Theme: Laser', kbd:'', run:()=>applyTheme('laser')},
     {label:'Reload Weather', kbd:'', run:loadWeather},
     {label:'Open Stream AI', kbd:'I', run:openStreamAI},
     {label:'Shutdown', kbd:'S', run:shutdown}
