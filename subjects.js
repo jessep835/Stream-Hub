@@ -63,6 +63,7 @@ const SUBJECTS = [
   { prefix: "FST", name: "Food Science & Tech",      aliases: [] },
   { prefix: "FTC", name: "Food Tech",                aliases: [] },
   { prefix: "HTC", name: "Hospitality (alt)",        aliases: [] },
+  { prefix: "HMT", name: "Hard Materials",           aliases: [] },
   { prefix: "FOO", name: "Food",                     aliases: [] },
   { prefix: "HOS", name: "Hospitality",              aliases: [] },
   { prefix: "TOU", name: "Tourism",                  aliases: ["TOURISM"] },
