@@ -6115,68 +6115,198 @@ function getUserName() {
 function buildSystemPrompt(){
     const AI_USER_NAME = getUserName();
     const now = new Date();
+
     const timeStr = now.toLocaleTimeString('en-NZ');
-    const dateStr = now.toLocaleDateString('en-NZ', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const dateStr = now.toLocaleDateString('en-NZ', {
+        weekday:'long',
+        day:'numeric',
+        month:'long',
+        year:'numeric'
+    });
+
     const weekLabel = getWeek() === 'week1' ? 'Week 1' : 'Week 2';
-    // Current & next period
+
+    /* ---------- CURRENT / NEXT PERIOD ---------- */
     const cur = getCurrentSlot();
     const nxt = getNextSlot();
+
     const curStr = cur
-        ? (cur.isBreak ? `${cur.slot.label||cur.slot.name} (${Math.ceil(cur.remaining)} min left)`
-                       : `${subjectFull[cur.subject]||cur.subject} until ${fmt(cur.slot.end)} (${Math.ceil(cur.remaining)} min left)`)
+        ? (
+            cur.isBreak
+                ? `${cur.slot.label || cur.slot.name} (${Math.ceil(cur.remaining)} min left)`
+                : `${subjectFull[cur.subject] || cur.subject} until ${fmt(cur.slot.end)} (${Math.ceil(cur.remaining)} min left)`
+          )
         : 'No current class';
+
     const nxtStr = nxt
-        ? `${subjectFull[nxt.subject]||nxt.subject} at ${fmt(nxt.slot.start)} (in ${Math.ceil(nxt.untilStart)} min)`
+        ? `${subjectFull[nxt.subject] || nxt.subject} at ${fmt(nxt.slot.start)} (in ${Math.ceil(nxt.untilStart)} min)`
         : 'No more classes today';
-    // Today's full schedule
+
+    /* ---------- TODAY'S SCHEDULE ---------- */
     const layout = getDayLayout();
+
     let schedStr = 'No classes today (weekend or no layout).';
+
     if(layout){
         const subs = timetable[getWeek()][layout.day];
+
         schedStr = layout.layout.map((s,i)=>{
             const si = layout.subjectIdx[i];
-            const subj = si !== null ? (subjectFull[subs[si]]||subs[si]) : (s.label||s.name);
+
+            const subj =
+                si !== null
+                    ? (subjectFull[subs[si]] || subs[si])
+                    : (s.label || s.name);
+
             return `  ${fmt(s.start)}–${fmt(s.end)}: ${subj}`;
         }).join('\n');
     }
-    // Assignments
-    const pending = state.assignments.filter(a=>!a.done);
-    const done = state.assignments.filter(a=>a.done);
+
+    /* ---------- ASSIGNMENTS ---------- */
+    const pending = state.assignments.filter(a => !a.done);
+    const done = state.assignments.filter(a => a.done);
+
     const assignStr = pending.length === 0
         ? 'No pending assignments.'
-        : pending.map(a=>`  • ${a.text}${a.due?' (due '+a.due+')':''}`).join('\n');
-    // Focus
-    const focusStr = `${focus.mode === 'work' ? 'Work session' : 'Break'}, ${Math.floor(focus.secs/60)}:${String(focus.secs%60).padStart(2,'0')} remaining, ${focus.done} session${focus.done===1?'':'s'} completed today, timer is ${focus.running?'RUNNING':'paused'}`;
-    // Weather
+        : pending
+            .map(a =>
+                `  • ${a.text}${a.due ? ` (due ${a.due})` : ''}`
+            )
+            .join('\n');
+
+    /* ---------- FOCUS TIMER ---------- */
+    const focusStr =
+        `${focus.mode === 'work' ? 'Work session' : 'Break'}, ` +
+        `${Math.floor(focus.secs / 60)}:${String(focus.secs % 60).padStart(2,'0')} remaining, ` +
+        `${focus.done} session${focus.done === 1 ? '' : 's'} completed today, ` +
+        `timer is ${focus.running ? 'RUNNING' : 'paused'}`;
+
+    /* ---------- WEATHER ---------- */
     const wxStr = lastWeather.temp !== null
         ? `${lastWeather.icon} ${lastWeather.temp}°C, ${lastWeather.desc}`
         : 'Weather not loaded yet.';
-    return `You are Stream AI, a smart, witty school assistant embedded in "Stream Hub" — a custom dashboard app used by ${AI_USER_NAME}, a NZ high school student. You have full live access to his real-time data listed below.
-CURRENT DATE & TIME: ${dateStr}, ${timeStr}
-SCHOOL WEEK: ${weekLabel}
-DAY: ${layout ? layout.day.charAt(0).toUpperCase()+layout.day.slice(1) : 'No school today'}
-CURRENT PERIOD: ${curStr}
-NEXT PERIOD: ${nxtStr}
+
+    /* ============================================================
+       LIVE ATTENDANCE — SAME DATA AS ATTENDANCE CARD
+    ============================================================ */
+    const attendanceDayOrder = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday'
+    ];
+
+    const attendanceToday = todayKey();
+
+    const attendanceTodayIndex =
+        attendanceToday
+            ? attendanceDayOrder.indexOf(attendanceToday)
+            : attendanceDayOrder.length - 1;
+
+    let attendancePresent = 0;
+    let attendanceElapsed = 0;
+
+    attendanceDayOrder.forEach((day, i) => {
+        if(i <= attendanceTodayIndex){
+            attendanceElapsed++;
+
+            if(state.attendance.days[day]){
+                attendancePresent++;
+            }
+        }
+    });
+
+    const attendancePercent =
+        attendanceElapsed > 0
+            ? Math.round(
+                (attendancePresent / attendanceElapsed) * 100
+              )
+            : 100;
+
+    const attendanceAbsences =
+        attendanceElapsed - attendancePresent;
+    /* ============================================================
+       LIVE NCEA CREDITS — SAME DATA AS CREDITS CARD
+    ============================================================ */
+    const creditTotal =
+        state.credits.excellence +
+        state.credits.merit +
+        state.credits.achieved;
+    const creditRemaining =
+        Math.max(0, NCEA_PASS_CREDITS - creditTotal);
+    const excellenceRemaining =
+        Math.max(
+            0,
+            NCEA_EXCELLENCE_ENDORSEMENT -
+            state.credits.excellence
+        );
+    /* ---------- RETURN SYSTEM PROMPT ---------- */
+    return `You are Stream AI, a smart, witty school assistant embedded in "Stream Hub" — a custom dashboard app used by ${AI_USER_NAME}, a NZ high school student.
+You have access to the student's LIVE Stream Hub data listed below. Treat this data as authoritative.
+CURRENT DATE & TIME:
+${dateStr}, ${timeStr}
+SCHOOL WEEK:
+${weekLabel}
+DAY:
+${layout
+    ? layout.day.charAt(0).toUpperCase() + layout.day.slice(1)
+    : 'No school today'}
+CURRENT PERIOD:
+${curStr}
+NEXT PERIOD:
+${nxtStr}
 TODAY'S FULL SCHEDULE:
 ${schedStr}
 PENDING ASSIGNMENTS (${pending.length}):
 ${assignStr}
-COMPLETED ASSIGNMENTS TODAY: ${done.length}
-FOCUS TIMER: ${focusStr}
-WEATHER (Auckland area): ${wxStr}
-NCEA CREDITS: 17/60 (43 to go)
-ATTENDANCE: 100%
-LOGIN STREAK: ${state.streak.count} day${state.streak.count===1?'':'s'}
-NOTES (current content): ${state.notes.trim() || '(empty)'}
-SUBJECTS: Mathematics (MATH), Physics (PHYS), Chemistry (CHEM), English (ENG), Design & Visual Communication (DVC), Religious Studies (RST).
+COMPLETED ASSIGNMENTS TODAY:
+${done.length}
+FOCUS TIMER:
+${focusStr}
+WEATHER:
+${wxStr}
+NCEA CREDITS:
+${creditTotal}/${NCEA_PASS_CREDITS}
+${creditRemaining} credits remaining to reach the ${NCEA_PASS_CREDITS}-credit target.
+CREDIT BREAKDOWN:
+Excellence: ${state.credits.excellence}
+Merit: ${state.credits.merit}
+Achieved: ${state.credits.achieved}
+EXCELLENCE ENDORSEMENT:
+${state.credits.excellence}/${NCEA_EXCELLENCE_ENDORSEMENT}
+${excellenceRemaining > 0
+    ? `${excellenceRemaining} more Excellence credits needed`
+    : 'Excellence Endorsed'}
+ATTENDANCE:
+${attendancePercent}% (${attendancePresent}/${attendanceElapsed} days present)
+Absences: ${attendanceAbsences}
+LOGIN STREAK:
+${state.streak.count} day${state.streak.count === 1 ? '' : 's'}
+NOTES:
+${state.notes.trim() || '(empty)'}
+SUBJECTS:
+Mathematics (MATH)
+Physics (PHYS)
+Chemistry (CHEM)
+English (ENG)
+Design & Visual Communication (DVC)
+Religious Studies (RST)
 INSTRUCTIONS:
-- Be concise, direct, and conversational. ${AI_USER_NAME} is a busy student.
-- Use **bold** for key info. Use bullet points for lists. Keep answers short unless depth is needed.
-- You can perform maths, explain concepts, give study tips, answer general knowledge, etc.
-- When asked about schedule/assignments/weather, use the live data above — do not say you can't access it.
+- Be concise, direct, and conversational.
+- Use **bold** for important information.
+- Use bullet points for lists.
+- Keep answers short unless the user asks for depth.
+- You can perform maths, explain concepts, give study tips, answer general knowledge, and help with schoolwork.
+- When asked about the timetable, use the LIVE schedule above.
+- When asked about assignments, use the LIVE assignments above.
+- When asked about attendance, use the LIVE attendance numbers above.
+- When asked about NCEA credits, use the LIVE credit totals and breakdown above.
+- Never invent attendance, credits, assignments, timetable information, or other Stream Hub data.
+- If the student edits their attendance or credits, use the updated values automatically.
+- If the question is school-related, give a proper educational answer.
+- Don't be overly formal. Be like a smart friend who knows ${AI_USER_NAME}'s school life.
 - You can tell ${AI_USER_NAME} to start/pause his focus timer or open apps — he will do it manually.
-- Don't be overly formal. Be like a smart friend who knows his schedule.
-- If the question is school-related (physics, chemistry, maths, etc.), give a proper educational answer.
 - Current real-world time/date is accurate — use it freely.`;
 }
 /* ---- GPT streaming call ---- */
