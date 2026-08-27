@@ -2812,7 +2812,6 @@ function applyTheme(name){
 document.querySelectorAll('.themeDot').forEach(d=>{
     d.onclick = () => { applyTheme(d.dataset.theme); beep(880); };
 });
-applyTheme(state.theme);
 /* ============================================================
    CUSTOM THEME SYSTEM
 ============================================================ */
@@ -2957,6 +2956,7 @@ function resetCustomTheme(){
     toast('Custom theme reset');
     beep(500);
 }
+applyTheme(state.theme);
 /* ---------- SOUND ---------- */
 let audioCtx;
 function beep(freq=600, dur=0.08, type='sine', vol=0.05){
