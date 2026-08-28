@@ -1468,7 +1468,7 @@ img {
     content: "✎";
 }
 .menu button:nth-child(6) .icon::before {
-    content: "✦";
+    content: "◈";
 }
 .menu button:nth-child(7) .icon::before {
     content: "⌘";
@@ -1799,11 +1799,31 @@ img {
 .aiHead .closeX{cursor:pointer;color:#ff6b6b;font-size:20px;background:none;border:1px solid rgba(255,107,107,.3);border-radius:8px;padding:4px 12px;}
 .aiBody{flex:1;display:flex;flex-direction:column;min-height:0;}
 #aiMessages{flex:1;overflow-y:auto;padding:20px 30px;display:flex;flex-direction:column;gap:14px;}
-.aiMsg{max-width:75%;padding:12px 16px;border-radius:14px;font-size:14px;line-height:1.55;animation:msgIn .3s ease;word-wrap:break-word;white-space:pre-wrap;}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.aiMsg.user{background:linear-gradient(135deg,var(--accent),rgba(0,240,255,.6));color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500;}
-.aiMsg.bot{background:rgba(255,255,255,.06);border:1px solid var(--accent-soft);color:white;align-self:flex-start;border-bottom-left-radius:4px;}
-.aiMsg.bot .botLabel{font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:6px;opacity:.8;}
+.aiMsg{
+    max-width:75%;
+    width:fit-content;
+    padding:8px 13px;
+    border-radius:12px;
+    font-size:14px;
+    line-height:1.4;
+    animation:msgIn .3s ease;
+    word-wrap:break-word;
+    white-space:pre-wrap;
+}
+.aiMsg.user{
+    background:var(--accent-gradient);
+    color:#000;
+    align-self:flex-end;
+    border-bottom-right-radius:4px;
+    font-weight:500;
+}
+.aiMsg.bot{
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--accent-soft);
+    color:white;
+    align-self:flex-start;
+    border-bottom-left-radius:4px;
+}
 .aiTyping{display:flex;gap:4px;align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--accent-soft);padding:14px 18px;border-radius:14px;}
 .aiTyping span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:typing 1.2s infinite;}
 .aiTyping span:nth-child(2){animation-delay:.2s;}.aiTyping span:nth-child(3){animation-delay:.4s;}
@@ -1864,6 +1884,55 @@ img {
 .aiBadge{font-size:10px;padding:3px 8px;border-radius:10px;letter-spacing:1px;font-weight:bold;}
 .aiBadge.live{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3);}
 .aiBadge.offline{background:rgba(255,180,0,.12);color:#ffb400;border:1px solid rgba(255,180,0,.3);}
+/* ===== STUDY MODE (CORNFLOWER, SCOPED TO #aiPanel) ===== */
+#aiPanel.ai-study{
+    --accent:#7A9FE8;
+    --accent-soft:rgba(122,159,232,.18);
+    --accent-glow:rgba(122,159,232,.55);
+    --accent-gradient:linear-gradient(90deg,#7A9FE8,#c9dbff);
+    background:linear-gradient(160deg,rgba(13,19,32,.96),rgba(20,28,52,.94));
+    border-color:#7A9FE8;
+    box-shadow:0 0 70px rgba(122,159,232,.35);
+}
+#aiPanel.ai-study .aiChip{background:rgba(122,159,232,.10);color:#dbe6ff;border-color:rgba(122,159,232,.28);}
+#aiPanel.ai-study .aiChip:hover{background:rgba(122,159,232,.22);border-color:#7A9FE8;}
+#aiPanel.ai-study code{background:rgba(122,159,232,.18) !important;}
+#aiPanel.ai-study .bootLog{color:#b9cdff;}
+#aiPanel.ai-study .bootTitleAI{letter-spacing:6px;}
+#aiPanel.ai-study #aiInput{background:rgba(13,19,32,.55);}
+/* Study launch tile — cornflower styled, matches Stocks HUB button anatomy.
+   Chained-class selector (.stocksLaunchBtn.stocksLaunchBtn--study) gives 0-2-0 specificity
+   so variant colors always beat the base .stocksLaunchBtn regardless of CSS source order. */
+.stocksLaunchBtn.stocksLaunchBtn--study{background:linear-gradient(135deg,rgba(122,159,232,.15),rgba(122,159,232,.04));border-color:rgba(122,159,232,.4);color:#7A9FE8;}
+.stocksLaunchBtn.stocksLaunchBtn--study::before{background:linear-gradient(90deg,transparent,rgba(122,159,232,.3),transparent);}
+.stocksLaunchBtn.stocksLaunchBtn--study:hover{background:linear-gradient(135deg,rgba(122,159,232,.3),rgba(122,159,232,.1));border-color:#7A9FE8;box-shadow:0 0 20px rgba(122,159,232,.4),inset 0 0 12px rgba(122,159,232,.15);}
+.stocksLaunchBtn.stocksLaunchBtn--study .slbDot{background:#7A9FE8;box-shadow:0 0 8px #7A9FE8;}
+/* General AI launch tile — bound live to the app --accent (auto-follows theme swaps). */
+.stocksLaunchBtn.stocksLaunchBtn--general{background:linear-gradient(135deg,var(--accent-soft),rgba(255,255,255,.02));border-color:var(--accent-soft);color:var(--accent);}
+.stocksLaunchBtn.stocksLaunchBtn--general::before{background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);}
+.stocksLaunchBtn.stocksLaunchBtn--general:hover{background:linear-gradient(135deg,var(--accent-glow),var(--accent-soft));border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow),inset 0 0 12px var(--accent-soft);}
+.stocksLaunchBtn.stocksLaunchBtn--general .slbDot{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+/* Active/lit states — when the AI panel is in study mode, the launch tile becomes the
+   "GENERAL AI" return-tile, so it lights up in --accent. The cornflower lit-state is kept
+   for any case where the study variant remains visible during study mode. */
+#aiPanel.ai-study .stocksLaunchBtn.stocksLaunchBtn--general{background:linear-gradient(135deg,var(--accent-glow),var(--accent-soft));border-color:var(--accent);color:#fff;box-shadow:0 0 16px var(--accent-glow),inset 0 0 10px var(--accent-soft);}
+#aiPanel.ai-study .stocksLaunchBtn.stocksLaunchBtn--study{background:linear-gradient(135deg,rgba(122,159,232,.32),rgba(122,159,232,.12));border-color:#7A9FE8;color:#dbe6ff;box-shadow:0 0 16px rgba(122,159,232,.45),inset 0 0 10px rgba(122,159,232,.18);}
+/* Study controls (level pills + subject select) — hidden unless in study mode */
+.studyControls{display:none;align-items:center;gap:6px;}
+#aiPanel.ai-study .studyControls{display:flex;}
+.levelPills{display:inline-flex;gap:2px;background:rgba(13,19,32,.55);border:1px solid rgba(122,159,232,.28);border-radius:10px;padding:2px;}
+.levelPill{background:transparent;border:none;color:#a8bce8;padding:4px 10px;border-radius:8px;font-size:11px;letter-spacing:1px;cursor:pointer;font-family:inherit;font-weight:bold;transition:.18s;}
+.levelPill:hover{color:#dbe6ff;background:rgba(122,159,232,.10);}
+.levelPill.active{background:#7A9FE8;color:#0D1320;box-shadow:0 0 10px rgba(122,159,232,.55);}
+.subjectSelect{padding:5px 10px;background:rgba(13,19,32,.55);border:1px solid rgba(122,159,232,.28);color:#c9dbff;border-radius:8px;font-size:11px;cursor:pointer;outline:none;font-family:inherit;max-width:160px;}
+.subjectSelect option{background:#0D1320;color:#dbe6ff;}
+/* Copy-question button (bot msgs, study mode only) */
+.copyQBtn{margin-top:6px;display:inline-flex;align-items:center;gap:4px;font-size:10px;letter-spacing:1px;padding:3px 8px;background:rgba(122,159,232,.12);border:1px solid rgba(122,159,232,.28);color:#c9dbff;border-radius:8px;cursor:pointer;font-family:inherit;transition:.18s;}
+.copyQBtn:hover{background:rgba(122,159,232,.28);border-color:#7A9FE8;}
+.copyQBtn.copied{background:rgba(122,232,159,.22);border-color:#7ae8a2;color:#c9ffdb;}
+#aiPanel.ai-study .aiMsg a{color:#7A9FE8;}
+#aiPanel.ai-study .aiMsg a:hover{color:#dbe6ff;}
+/* ===== STOCKS HUB ===== */
 /* ===== STOCKS HUB ===== */
 #stocksOverlay{position:fixed;inset:0;background:rgba(0,5,15,.88);backdrop-filter:blur(12px);z-index:10000;display:none;justify-content:center;align-items:center;animation:fadeIn .25s;}
 #stocksOverlay.show{display:flex;}
@@ -2014,13 +2083,22 @@ img {
 .ttPeriod .name{font-weight:bold;flex:1;}
 .ttPeriod .num{opacity:.5;font-size:10px;}
 /* Stocks launch button */
-.stocksLaunchBtn{display:flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,255,136,.04));border:1px solid rgba(0,255,136,.4);border-radius:22px;color:#00ff88;cursor:pointer;font-size:12px;font-weight:bold;letter-spacing:2px;font-family:inherit;transition:.25s;position:relative;overflow:hidden;}
-.stocksLaunchBtn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,255,136,.3),transparent);transform:translateX(-100%);transition:.5s;}
+/* Base launch tile — theme-neutral, routes through --accent variables.
+   Green is NO LONGER inherited here; each variant supplies its own color stops so future
+   AI modes default to --accent instead of leaking the Stocks green signal. */
+.stocksLaunchBtn{display:flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,var(--accent-soft),rgba(255,255,255,.02));border:1px solid var(--accent-soft);border-radius:22px;color:var(--accent);cursor:pointer;font-size:12px;font-weight:bold;letter-spacing:2px;font-family:inherit;transition:.25s;position:relative;overflow:hidden;}
+.stocksLaunchBtn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);transform:translateX(-100%);transition:.5s;}
 .stocksLaunchBtn:hover::before{transform:translateX(100%);}
-.stocksLaunchBtn:hover{background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,255,136,.1));border-color:#00ff88;box-shadow:0 0 20px rgba(0,255,136,.4),inset 0 0 12px rgba(0,255,136,.15);transform:translateY(-1px);}
-.stocksLaunchBtn .slbDot{width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:pulse 1.4s infinite;}
+.stocksLaunchBtn:hover{background:linear-gradient(135deg,var(--accent-glow),var(--accent-soft));border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow),inset 0 0 12px var(--accent-soft);transform:translateY(-1px);}
+.stocksLaunchBtn .slbDot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 1.4s infinite;}
 .stocksLaunchBtn .slbArrow{transition:.2s;opacity:.7;}
 .stocksLaunchBtn:hover .slbArrow{transform:translateX(3px);opacity:1;}
+/* Stocks-only variant — green stays hardcoded here as a stocks-exclusive signal.
+   Chained-class specificity (0-2-0) locks green to this variant only. */
+.stocksLaunchBtn.stocksLaunchBtn--stocks{background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,255,136,.04));border-color:rgba(0,255,136,.4);color:#00ff88;}
+.stocksLaunchBtn.stocksLaunchBtn--stocks::before{background:linear-gradient(90deg,transparent,rgba(0,255,136,.3),transparent);}
+.stocksLaunchBtn.stocksLaunchBtn--stocks:hover{background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,255,136,.1));border-color:#00ff88;box-shadow:0 0 20px rgba(0,255,136,.4),inset 0 0 12px rgba(0,255,136,.15);}
+.stocksLaunchBtn.stocksLaunchBtn--stocks .slbDot{background:#00ff88;box-shadow:0 0 8px #00ff88;}
 </style>
 </head>
 <body>
@@ -2444,11 +2522,26 @@ img {
     <option value="qwen/qwen3.6-27b">Qwen 3.6 27B 🧠</option>
     <option value="openai/gpt-oss-20b">GPT-OSS 20B 🚀</option>
 </select>
-                <button class="stocksLaunchBtn" onclick="openStocks()">
-    <span class="slbDot"></span>
+    <button class="stocksLaunchBtn stocksLaunchBtn--stocks" id="stocksLaunchTile" onclick="openStocks()">
+<span class="slbDot"></span>
     <span>STOCKS HUB</span>
     <span class="slbArrow">→</span>
 </button>
+                                <button class="stocksLaunchBtn stocksLaunchBtn--study" id="studyLaunchTile" onclick="toggleStudyMode()">
+    <span class="slbDot"></span>
+    <span id="studyLaunchLabel">STUDY</span>
+    <span class="slbArrow">→</span>
+</button>
+                <div class="studyControls" id="studyControls">
+                    <div class="levelPills" role="group" aria-label="NCEA level">
+                        <button type="button" class="levelPill" data-level="1" onclick="setStudyLevel(1)">L1</button>
+                        <button type="button" class="levelPill active" data-level="2" onclick="setStudyLevel(2)">L2</button>
+                        <button type="button" class="levelPill" data-level="3" onclick="setStudyLevel(3)">L3</button>
+                    </div>
+                    <select class="subjectSelect" id="studySubjectSelect" onchange="setStudySubject(this.value)" title="Focus subject">
+                        <option value="">All subjects</option>
+                    </select>
+                </div>
                 <button class="aiBtn" onclick="showKeySetup()" style="width:36px;height:36px;font-size:14px;" title="Change API key">🔑</button>
                 <button class="aiBtn" onclick="aiClearChat()" style="width:36px;height:36px;font-size:14px;" title="Clear chat">🗑</button>
                 <button class="closeX" onclick="closeStreamAI()">✕</button>
@@ -5403,6 +5496,7 @@ const commands = [
     {label:'Theme: Laser', kbd:'', run:()=>applyTheme('laser')},
     {label:'Reload Weather', kbd:'', run:loadWeather},
     {label:'Open Stream AI', kbd:'I', run:openStreamAI},
+    {label:'Open Study AI', kbd:'U', run:openStudyAI},
     {label:'Shutdown', kbd:'S', run:shutdown}
 ];
 let paletteSel = 0;
@@ -5487,6 +5581,7 @@ document.addEventListener('keydown', e=>{
     else if(e.key.toLowerCase() === 'p') openDrawPad();
     else if(e.key.toLowerCase() === 't') openTimetableEditor();
     else if(e.key.toLowerCase() === 'i' && !e.ctrlKey && !e.metaKey) openStreamAI();
+    else if(e.key.toLowerCase() === 'u' && !e.ctrlKey && !e.metaKey) openStudyAI();
     if(e.key === 'Escape' && document.getElementById('aiOverlay').classList.contains('show')) closeStreamAI();
 });
 /* ---------- TOAST ---------- */
@@ -5981,11 +6076,25 @@ function floodFill(sx,sy,hex){
    ===================================================== */
 const ai = {
     booted: false,
-    history: LS.get('sh_ai_chat', []),
+    mode: 'stocks',
+    storageKeys: { stocks: 'sh_ai_chat', study: 'stream_ai_study_history' },
+    histories: {
+        stocks: LS.get('sh_ai_chat', []),
+        study: LS.get('stream_ai_study_history', [])
+    },
     recognition: null,
     listening: false,
-    streaming: false
+        streaming: false,
+    study: {
+        level: parseInt(LS.get('stream_ai_study_level', '2'), 10) || 2,
+        subject: LS.get('stream_ai_study_subject', '') || ''
+    }
 };
+// Active history is a live reference to the current mode's array
+ai.history = ai.histories[ai.mode];
+function aiPersistHistory(){
+    LS.set(ai.storageKeys[ai.mode], ai.history);
+}
 /* ---- API Key management ---- */
 function getApiKey(){ return localStorage.getItem('sh_openai_key') || ''; }
 function setApiKey(k){ localStorage.setItem('sh_openai_key', k.trim()); updateAIBadge(); }
@@ -6041,12 +6150,123 @@ function focusAIInput(){
 /* ---- Open / Close ---- */
 async function openStreamAI(){
     await loadUserProfile();
+    activateAIMode('stocks');
     document.getElementById('aiOverlay').classList.add('show');
     beep(1100);
     if(!ai.booted){
         runAIBoot();
     } else {
+        aiRenderHistory();
+        renderSuggestions();
         focusAIInput();
+    }
+}
+async function openStudyAI(){
+    await loadUserProfile();
+    activateAIMode('study');
+    document.getElementById('aiOverlay').classList.add('show');
+    beep(1250);
+    if(!ai.booted){
+        runAIBoot();
+    } else {
+        aiRenderHistory();
+        renderSuggestions();
+        // Greet if study history is fresh
+        if(ai.history.length === 0){
+            aiBotSay(`Kia ora! ✦ **Study AI** here — your NCEA study buddy.\n\nI've got your timetable subjects loaded, plus every NZQA past-paper link. Pick a level up top, choose a subject, or just ask me anything below.`);
+        }
+        setTimeout(focusAIInput, 120);
+    }
+}
+function toggleStudyMode(){
+    // When invoked from inside the AI panel, swap between modes
+    if(ai.mode === 'study'){
+        activateAIMode('stocks');
+    } else {
+        activateAIMode('study');
+    }
+    aiRenderHistory();
+    renderSuggestions();
+    setTimeout(focusAIInput, 120);
+}
+function activateAIMode(mode){
+    ai.mode = mode;
+    ai.history = ai.histories[mode];
+    const panel = document.getElementById('aiPanel');
+    const tileBtn = document.getElementById('studyLaunchTile');
+    if(mode === 'study'){
+        panel.classList.add('ai-study');
+        document.getElementById('aiInput').placeholder = "Ask Study AI — 'Give me 5 L2 Calculus questions'...";
+        const tileLabel = document.getElementById('studyLaunchLabel');
+        if(tileLabel) tileLabel.innerText = 'GENERAL AI';
+        // Button now returns to General AI → swap variant to --accent theme.
+        if(tileBtn){ tileBtn.classList.remove('stocksLaunchBtn--study'); tileBtn.classList.add('stocksLaunchBtn--general'); }
+        populateStudySubjectSelect();
+        syncStudyLevelPills();
+    } else {
+        panel.classList.remove('ai-study');
+        document.getElementById('aiInput').placeholder = "Ask Stream AI anything...";
+        const tileLabel = document.getElementById('studyLaunchLabel');
+        if(tileLabel) tileLabel.innerText = 'STUDY MODE';
+        // Button now launches Study → swap variant to cornflower.
+        if(tileBtn){ tileBtn.classList.remove('stocksLaunchBtn--general'); tileBtn.classList.add('stocksLaunchBtn--study'); }
+    }
+}
+function setStudyLevel(lvl){
+    ai.study.level = lvl;
+    LS.set('stream_ai_study_level', String(lvl));
+    syncStudyLevelPills();
+    beep(1000, 0.03);
+}
+function syncStudyLevelPills(){
+    document.querySelectorAll('#studyControls .levelPill').forEach(p=>{
+        p.classList.toggle('active', parseInt(p.dataset.level,10) === ai.study.level);
+    });
+}
+function setStudySubject(sub){
+    ai.study.subject = sub || '';
+    LS.set('stream_ai_study_subject', ai.study.subject);
+    beep(900, 0.03);
+}
+function getStudySubjectList(){
+    // Prefer subjects present in the user's timetable, else fall back to a generic NCEA list.
+    const found = new Map();
+    try{
+        if(typeof timetable === 'object' && timetable){
+            for(const wk of Object.values(timetable)){
+                if(!wk || typeof wk !== 'object') continue;
+                for(const day of Object.values(wk)){
+                    if(!Array.isArray(day)) continue;
+                    for(const code of day){
+                        if(!code || typeof code !== 'string') continue;
+                        const prefix = code.slice(0,3).toUpperCase();
+                        const name = (typeof subjectFull === 'object' && subjectFull[prefix]) || null;
+                        if(name && !/\balt\b/i.test(name)){
+                            found.set(prefix, name);
+                        }
+                    }
+                }
+            }
+        }
+    }catch(e){}
+    if(found.size > 0){
+        return Array.from(found.values()).sort();
+    }
+    // Fallback generic NCEA subjects
+    return ['Mathematics','Statistics','Calculus','English','Physics','Chemistry','Biology','History','Geography','Economics','Accounting','Media Studies','Design & Visual Comm.','Digital Technologies','Physical Education','Health','Music','Drama','Art History','Classical Studies','Religious Studies','Te Reo Māori'];
+}
+function populateStudySubjectSelect(){
+    const sel = document.getElementById('studySubjectSelect');
+    if(!sel) return;
+    const subs = getStudySubjectList();
+    const current = ai.study.subject || '';
+    sel.innerHTML = '<option value="">All subjects</option>' + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    // Restore selection if still valid
+    if(current && subs.includes(current)){
+        sel.value = current;
+    } else {
+        sel.value = '';
+        ai.study.subject = '';
     }
 }
 function closeStreamAI(){
@@ -6087,7 +6307,11 @@ function runAIBoot(){
             }, 900);
         } else {
             if(ai.history.length === 0){
-                aiBotSay(`Hey! 👋 I'm **Stream AI** — powered by GPT, with access to your live schedule, assignments, weather and more.\n\nAsk me anything or pick a chip below.`);
+                if(ai.mode === 'study'){
+                    aiBotSay(`Kia ora! ✦ I'm **Study AI** — your NCEA study buddy. I know your timetable subjects and I've got every NZQA past-paper link handy.\n\nPick your level (L1/L2/L3), choose a subject, or try a chip below.`);
+                } else {
+                    aiBotSay(`Hey! 👋 I'm **Stream AI** — powered by GPT, with access to your live schedule, assignments, weather and more.\n\nAsk me anything or pick a chip below.`);
+                }
             }
             renderSuggestions();
             setTimeout(()=>document.getElementById('aiInput').focus(), 200);
@@ -6309,12 +6533,88 @@ INSTRUCTIONS:
 - You can tell ${AI_USER_NAME} to start/pause his focus timer or open apps — he will do it manually.
 - Current real-world time/date is accurate — use it freely.`;
 }
+/* ---- Study AI system prompt ---- */
+function buildStudySystemPrompt(){
+    const AI_USER_NAME = getUserName();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-NZ', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const timeStr = now.toLocaleTimeString('en-NZ');
+
+    const lvl = ai.study.level || 2;
+    const focusSubject = ai.study.subject || '';
+    const subjectList = getStudySubjectList();
+
+    // Timetable subjects (codes -> full names)
+    let timetableSubs = 'None detected.';
+    try{
+        const found = new Set();
+        if(typeof timetable === 'object' && timetable){
+            for(const wk of Object.values(timetable)){
+                if(!wk) continue;
+                for(const day of Object.values(wk)){
+                    if(!Array.isArray(day)) continue;
+                    day.forEach(code => {
+                        if(!code) return;
+                        const prefix = String(code).slice(0,3).toUpperCase();
+                        const name = (typeof subjectFull === 'object' && subjectFull[prefix]) || prefix;
+                        found.add(`${prefix} — ${name}`);
+                    });
+                }
+            }
+        }
+        if(found.size) timetableSubs = Array.from(found).sort().join('\n');
+    }catch(e){}
+
+    /* Pending assignments (short list) */
+    const pending = (state.assignments || []).filter(a => !a.done);
+    const assignStr = pending.length === 0
+        ? 'No pending assignments.'
+        : pending.map(a => `  • ${a.text}${a.due ? ` (due ${a.due})` : ''}`).join('\n');
+
+    /* Credits snapshot */
+    const creditTotal = state.credits.excellence + state.credits.merit + state.credits.achieved;
+
+    return `You are Study AI, a focused NCEA study tutor embedded in "Stream Hub" — used by ${AI_USER_NAME}, a New Zealand high school student.
+You help with NCEA Levels 1, 2 and 3. You know NZQA structure (Achievement Standards, Achieved / Merit / Excellence grades) and can point students to NZQA past-paper resources.
+
+CURRENT DATE & TIME:
+${dateStr}, ${timeStr}
+
+STUDENT CONTEXT:
+- Active NCEA Level: L${lvl}
+- Focus subject: ${focusSubject || '(none — general study)'}
+- Timetable subjects:
+${timetableSubs}
+- Available subjects for study: ${subjectList.join(', ')}
+- Pending assignments:
+${assignStr}
+- Current NCEA credits earned: ${creditTotal} (Excellence ${state.credits.excellence}, Merit ${state.credits.merit}, Achieved ${state.credits.achieved})
+
+NZQA PAST-PAPER LINKS:
+- General NZQA past-paper search: https://www.nzqa.govt.nz/qualifications-standards/qualifications/ncea/subjects/
+- Level 1: https://www.nzqa.govt.nz/ncea/subjects/?level=01
+- Level 2: https://www.nzqa.govt.nz/ncea/subjects/?level=02
+- Level 3: https://www.nzqa.govt.nz/ncea/subjects/?level=03
+When the student asks for past papers, give the most relevant NZQA link based on their level and subject, plus a short "search this on NZQA" query.
+
+INSTRUCTIONS:
+- Stay in Study Mode. Focus purely on study, revision, concepts, past papers, exam technique, and NCEA guidance.
+- Match the student's active level (L${lvl}) unless they explicitly ask for another level.
+- When generating practice questions, format them clearly (numbered), and offer to mark answers using the NCEA grade bands (Achieved / Merit / Excellence).
+- When explaining concepts, be concise first, then offer to go deeper.
+- Use **bold** for key terms, bullet points for lists, and \`code\` for formulas.
+- If the student gives an answer, mark it with clear reasoning and an NCEA grade band.
+- Never invent past-paper questions and claim they are official NZQA — say "practice question in the style of NZQA" instead.
+- Do not chat about non-study topics; politely steer back to study.
+- Encourage good study habits (Pomodoro, spaced repetition) when relevant, but keep it short.
+- Speak like a friendly, sharp tutor — not a textbook. Use plain Kiwi English.`;
+}
 /* ---- GPT streaming call ---- */
 async function callGPTStream(userMessage, onChunk, onDone){
     const key = getApiKey();
     if(!key) throw new Error('NO_KEY');
     const model = document.getElementById('modelSelect')?.value || 'gpt-4o-mini';
-    const systemPrompt = buildSystemPrompt();
+    const systemPrompt = ai.mode === 'study' ? buildStudySystemPrompt() : buildSystemPrompt();
     // Build messages array: system + last 20 turns + new user message
     const historyMessages = ai.history.slice(-8).map(m=>({
         role: m.role === 'bot' ? 'assistant' : 'user',
@@ -6378,14 +6678,40 @@ function addBubble(role, text, save=true){
     const b = document.getElementById('aiMessages');
     const d = document.createElement('div');
     d.className = 'aiMsg ' + role;
-    if(role === 'bot') d.innerHTML = `<div class="botLabel">⬡ STREAM AI</div>` + formatBot(text);
-    else d.innerText = text;
+    if(role === 'bot'){
+        d.innerHTML = formatBot(text);
+    }else{
+        d.innerText = text;
+    }
     b.appendChild(d);
     b.scrollTop = b.scrollHeight;
     if(save){
         ai.history.push({role, text});
-        if(ai.history.length > 200) ai.history.shift();
+        if(ai.history.length > 200){
+            ai.history.shift();
+        }
         LS.set('sh_ai_chat', ai.history);
+            // Persist to active mode storage (handles both stocks and study keys)
+        aiPersistHistory();
+        }
+    // Study mode: add a copy button to bot messages so students can grab practice questions
+    if(role === 'bot' && ai.mode === 'study'){
+        const btn = document.createElement('button');
+        btn.className = 'copyQBtn';
+        btn.type = 'button';
+        btn.innerHTML = '📋 COPY';
+        btn.addEventListener('click', ()=>{
+            const plain = text;
+            navigator.clipboard?.writeText(plain).then(()=>{
+                btn.classList.add('copied');
+                btn.innerHTML = '✓ COPIED';
+                setTimeout(()=>{
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '📋 COPY';
+                }, 1400);
+            }).catch(()=>{});
+        });
+        d.appendChild(btn);
     }
     return d;
 }
@@ -6394,7 +6720,6 @@ function addStreamingBubble(){
     const d = document.createElement('div');
     d.className = 'aiMsg bot';
     d.innerHTML = `
-        <div class="aiHeader">⬡ STREAM AI</div>
         <div id="streamContent"></div>
     `;
     b.appendChild(d);
@@ -6514,9 +6839,45 @@ function tryLocalResponse(raw){
     // Notes
     if(/my notes|show notes|read.*notes/i.test(lq)) return state.notes.trim()?`**Your notes:**\n${state.notes}`:"Notes are empty.";
     // Stats
-    if(/streak/i.test(lq)) return `**${state.streak.count}**-day streak 🔥`;
-    if(/credit|ncea/i.test(lq)) return "**17/60** credits. 43 to go 💪";
-    if(/attendance/i.test(lq)) return "**100%** attendance 🔥";
+    if(/streak/i.test(lq)){
+        return `**${state.streak.count}**-day streak 🔥`;
+    }
+    if(/credit|ncea/i.test(lq)){
+        const creditTotal =
+            state.credits.excellence +
+            state.credits.merit +
+            state.credits.achieved;
+        const creditRemaining =
+            Math.max(0, NCEA_PASS_CREDITS - creditTotal);
+        return `**${creditTotal}/${NCEA_PASS_CREDITS}** credits. ${creditRemaining} to go 💪`;
+    }
+    if(/attendance/i.test(lq)){
+        const dayOrder = [
+            'monday',
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday'
+        ];
+        const today = todayKey();
+        const todayIndex = today
+            ? dayOrder.indexOf(today)
+            : dayOrder.length - 1;
+        let present = 0;
+        let elapsed = 0;
+        dayOrder.forEach((day, i) => {
+            if(i <= todayIndex){
+                elapsed++;
+                if(state.attendance.days[day]){
+                    present++;
+                }
+            }
+        });
+        const percent = elapsed > 0
+            ? Math.round((present / elapsed) * 100)
+            : 100;
+        return `**${percent}%** attendance 🔥`;
+    }
     // Theme
     const themeMap = [
     { keys: ["cyan"], theme: "cyan" },
@@ -6586,13 +6947,16 @@ async function aiSubmit(){
     addBubble('user', text);
     input.value = '';
     beep(900, 0.04);
-    // Try fast local path first
-    const local = tryLocalResponse(text);
-    if(local){
-        aiBotSay(local);
-        renderSuggestions(text);
-        ai.streaming = false;
-        return;
+    // In study mode, skip local shortcuts (theme swaps, focus timer, etc.) — always go to the tutor.
+    if(ai.mode !== 'study'){
+        // Try fast local path first
+        const local = tryLocalResponse(text);
+        if(local){
+            aiBotSay(local);
+            renderSuggestions(text);
+            ai.streaming = false;
+            return;
+        }
     }
     // Use GPT
     const key = getApiKey();
@@ -6618,11 +6982,29 @@ async function aiSubmit(){
                 msgBox.scrollTop = msgBox.scrollHeight;
             },
             (finalText) => {
-                // Save to history
+                // Save to history (active mode)
                 ai.history.push({role:'bot', text: finalText});
                 if(ai.history.length > 200) ai.history.shift();
-                LS.set('sh_ai_chat', ai.history);
+                aiPersistHistory();
                 beep(1300, 0.04);
+                // Study mode: attach a "copy question" button to the streamed bubble
+                if(ai.mode === 'study' && !bubble.querySelector('.copyQBtn')){
+                    const btn = document.createElement('button');
+                    btn.className = 'copyQBtn';
+                    btn.type = 'button';
+                    btn.innerHTML = '📋 COPY';
+                    btn.addEventListener('click', ()=>{
+                        navigator.clipboard?.writeText(finalText).then(()=>{
+                            btn.classList.add('copied');
+                            btn.innerHTML = '✓ COPIED';
+                            setTimeout(()=>{
+                                btn.classList.remove('copied');
+                                btn.innerHTML = '📋 COPY';
+                            }, 1400);
+                        }).catch(()=>{});
+                    });
+                    bubble.appendChild(btn);
+                }
             }
         );
     } catch(err){
@@ -6641,12 +7023,17 @@ async function aiSubmit(){
 }
 function aiClearChat(){
     if(!confirm('Clear chat?')) return;
-    ai.history = [];
-    LS.set('sh_ai_chat', ai.history);
+    // Clear BOTH the shared reference and the per-mode history bucket so it doesn't come back on reopen
+    const mode = ai.mode || 'stocks';
+    ai.histories[mode] = [];
+    ai.history = ai.histories[mode];
+    LS.set(ai.storageKeys[mode], []);
     document.getElementById('aiMessages').innerHTML = '';
-    addBubble('bot', 'Chat cleared. What do you need?');
+    const greeting = mode === 'study'
+        ? 'Chat cleared. What do you need?'
+        : 'Chat cleared. What do you need?';
+    addBubble('bot', greeting);
     renderSuggestions();
-    // Do exactly what opening Stream AI does
     setTimeout(() => {
         document.getElementById('aiInput').focus();
     }, 200);
@@ -6662,8 +7049,33 @@ const baseSuggestions = [
     "Give me a study tip",
     "Start focus timer"
 ];
+function studySuggestionSet(){
+    const lvl = ai.study.level || 2;
+    const sub = ai.study.subject || '';
+    if(sub){
+        return [
+            `Give me 5 L${lvl} ${sub} practice questions`,
+            `Explain a tricky L${lvl} ${sub} concept for me`,
+            `Walk me through a past paper question in ${sub}`,
+            `What achievement standards are in L${lvl} ${sub}?`,
+            `Send the NZQA past-paper link for L${lvl} ${sub}`,
+            `Mark my answer at Achieved/Merit/Excellence`,
+            `Quick revision summary — L${lvl} ${sub}`
+        ];
+    }
+    return [
+        `Give me 5 L${lvl} Calculus questions`,
+        `Explain photosynthesis for L1 Bio`,
+        `Past paper walkthrough — L${lvl} Physics`,
+        `L${lvl} English essay structure`,
+        `NZQA search link for L${lvl}`,
+        `What's the difference between Merit and Excellence?`,
+        `Give me a 10-min study plan for tonight`
+    ];
+}
 function renderSuggestions(){
-    document.getElementById('aiSuggests').innerHTML = baseSuggestions.map(t=>
+    const list = ai.mode === 'study' ? studySuggestionSet() : baseSuggestions;
+    document.getElementById('aiSuggests').innerHTML = list.map(t=>
         `<div class="aiChip" onclick="aiUseSuggest('${t.replace(/'/g,"\\'")}')">${t}</div>`
     ).join('');
 }
