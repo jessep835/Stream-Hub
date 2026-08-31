@@ -1538,7 +1538,6 @@ img {
         opacity: 0;
         transform: translateY(20px) scale(0.96);
     }
-
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -2557,6 +2556,127 @@ img {
         </div>
     </div>
 </div>
+<!-- ===== STREAM CHESS OVERLAY ===== -->
+<style>
+#chessOverlay{position:fixed;inset:0;background:rgba(0,5,15,.75);backdrop-filter:blur(8px);z-index:9999;display:none;justify-content:center;align-items:center;animation:fadeIn .25s;}
+#chessOverlay.show{display:flex;}
+#chessPanel{width:92vw;max-width:1200px;height:88vh;background:rgba(0,10,20,.92);border:1px solid var(--accent);border-radius:18px;box-shadow:0 0 60px var(--accent-glow);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#chessPanel .aiHead{padding:14px 20px;border-bottom:1px solid var(--accent-soft);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px;flex-wrap:wrap;}
+#chessPanel .aiHead .ttl{color:var(--accent);letter-spacing:3px;font-size:14px;text-shadow:0 0 10px var(--accent-glow);display:flex;align-items:center;gap:10px;}
+#chessPanel .aiHead .orb{width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:pulse 1.6s infinite;}
+#chessPanel .aiHead .closeX{cursor:pointer;color:#ff6b6b;font-size:20px;background:none;border:1px solid rgba(255,107,107,.3);border-radius:8px;padding:4px 12px;}
+.chessCtrlBtn{padding:6px 12px;background:rgba(0,240,255,.08);border:1px solid var(--accent-soft);border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:1px;transition:.2s;}
+.chessCtrlBtn:hover{background:var(--accent-soft);border-color:var(--accent);}
+.chessCtrlBtn.danger{color:#ff6b6b;border-color:rgba(255,107,107,.3);background:rgba(255,107,107,.06);}
+.chessCtrlBtn.danger:hover{background:rgba(255,107,107,.15);}
+.chessBody{flex:1;display:flex;min-height:0;padding:18px;gap:18px;overflow:hidden;}
+.chessLeft{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.chessCapRow{display:flex;gap:2px;height:26px;font-size:20px;line-height:1;color:#cfeeff;min-height:26px;width:100%;justify-content:center;flex-wrap:wrap;}
+#chessBoardWrap{position:relative;aspect-ratio:1/1;height:min(70vh,90%);max-width:100%;display:flex;align-items:center;justify-content:center;}
+#chessBoard{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%;border:2px solid var(--accent);border-radius:8px;overflow:hidden;box-shadow:0 0 40px var(--accent-glow);user-select:none;}
+.chessSq{display:flex;align-items:center;justify-content:center;font-size:min(6vh,44px);cursor:pointer;position:relative;transition:background .15s;}
+.chessSq.light{background:#e8ebf0;}
+.chessSq.dark{background:#4a6a8a;}
+.chessSq .piece{filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));pointer-events:none;line-height:1;font-size:1em;}
+.chessSq.wPiece .piece{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 2px #000;}
+.chessSq.bPiece .piece{color:#000;text-shadow:0 0 1px #fff;}
+.chessSq.selected{background:#f6d34a !important;box-shadow:inset 0 0 0 3px var(--accent);}
+.chessSq.moveTarget::after{content:'';position:absolute;width:32%;height:32%;border-radius:50%;background:rgba(0,240,255,.55);pointer-events:none;}
+.chessSq.captureTarget::after{content:'';position:absolute;inset:6%;border:4px solid rgba(255,80,80,.75);border-radius:50%;pointer-events:none;background:transparent;}
+.chessSq.lastMove{background:rgba(246,211,74,.35) !important;}
+.chessSq.check{background:radial-gradient(circle,#ff5566 40%,#993344 100%) !important;animation:pulse 1s infinite;}
+.chessSq .coord{position:absolute;font-size:10px;font-weight:bold;opacity:.55;pointer-events:none;font-family:Consolas,monospace;}
+.chessSq .coord.file{bottom:2px;right:3px;}
+.chessSq .coord.rank{top:2px;left:3px;}
+.chessSq.light .coord{color:#4a6a8a;}
+.chessSq.dark .coord{color:#e8ebf0;}
+.chessRight{width:320px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;overflow:hidden;}
+.chessCard{background:rgba(0,0,0,.35);border:1px solid var(--accent-soft);border-radius:10px;padding:12px 14px;}
+.chessCard h4{margin:0 0 8px;font-size:11px;letter-spacing:2px;color:var(--accent);opacity:.85;}
+.chessTurnRow{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:#cfeeff;}
+.chessTurnDot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:8px;box-shadow:0 0 8px currentColor;vertical-align:middle;}
+.chessTurnDot.white{background:#fff;color:#fff;}
+.chessTurnDot.black{background:#111;color:#333;border:1px solid #666;}
+.chessDiff{display:flex;gap:6px;}
+.chessDiff button{flex:1;padding:8px 10px;background:rgba(0,240,255,.06);border:1px solid var(--accent-soft);color:#cfeeff;border-radius:8px;cursor:pointer;font-family:inherit;font-size:11px;letter-spacing:1px;transition:.15s;}
+.chessDiff button.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:bold;}
+.chessDiff button:hover:not(.active){background:var(--accent-soft);}
+.chessHistWrap{flex:1;overflow-y:auto;min-height:0;background:rgba(0,0,0,.35);border:1px solid var(--accent-soft);border-radius:10px;padding:10px 12px;}
+.chessHistWrap h4{margin:0 0 6px;font-size:11px;letter-spacing:2px;color:var(--accent);opacity:.85;position:sticky;top:0;background:rgba(0,10,20,.9);padding-bottom:4px;}
+#chessHistory{font-family:Consolas,monospace;font-size:12px;color:#cfeeff;display:grid;grid-template-columns:32px 1fr 1fr;gap:2px 8px;line-height:1.6;}
+#chessHistory .num{opacity:.5;}
+#chessHistory .mv{padding:1px 4px;border-radius:3px;}
+.chessGameOver{position:absolute;inset:0;background:rgba(0,10,20,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:20;backdrop-filter:blur(6px);}
+.chessGameOver.show{display:flex;}
+.chessGameOver .goTitle{font-size:38px;letter-spacing:6px;color:var(--accent);text-shadow:0 0 20px var(--accent-glow);font-weight:bold;}
+.chessGameOver .goSub{font-size:14px;opacity:.75;letter-spacing:2px;}
+#chessPromoDialog{position:absolute;inset:0;background:rgba(0,10,20,.9);display:none;align-items:center;justify-content:center;z-index:30;backdrop-filter:blur(6px);}
+#chessPromoDialog.show{display:flex;}
+.chessPromoBox{background:rgba(0,20,35,.98);border:1px solid var(--accent);border-radius:14px;padding:22px 28px;display:flex;flex-direction:column;gap:12px;align-items:center;box-shadow:0 0 40px var(--accent-glow);}
+.chessPromoBox .ttl{color:var(--accent);letter-spacing:3px;font-size:13px;}
+.chessPromoRow{display:flex;gap:10px;}
+.chessPromoBtn{width:64px;height:64px;font-size:44px;background:#e8ebf0;border:2px solid var(--accent-soft);border-radius:10px;cursor:pointer;color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 2px #000;transition:.15s;line-height:1;display:flex;align-items:center;justify-content:center;}
+.chessPromoBtn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 0 20px var(--accent-glow);}
+@media (max-width:900px){
+  .chessBody{flex-direction:column;padding:10px;gap:10px;}
+  .chessRight{width:100%;flex-direction:row;flex-wrap:wrap;height:auto;}
+  .chessHistWrap{max-height:120px;flex:1 1 100%;}
+  #chessBoardWrap{height:min(55vh,90vw);}
+}
+</style>
+<div id="chessOverlay" onclick="if(event.target.id==='chessOverlay')closeChess()">
+    <div id="chessPanel">
+        <div class="aiHead">
+            <div class="ttl">
+                <span class="orb"></span>
+                STREAM CHESS
+                <span class="aiBadge live" id="chessStatusBadge">READY</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <div class="chessDiff" data-testid="chess-difficulty">
+                    <button data-diff="1" onclick="chessSetDifficulty(1)">EASY</button>
+                    <button data-diff="2" class="active" onclick="chessSetDifficulty(2)">MEDIUM</button>
+                    <button data-diff="3" onclick="chessSetDifficulty(3)">HARD</button>
+                </div>
+                <button class="chessCtrlBtn" data-testid="chess-flip-btn" onclick="chessFlipBoard()">⇅ FLIP</button>
+                <button class="chessCtrlBtn" data-testid="chess-undo-btn" onclick="chessUndo()">↶ UNDO</button>
+                <button class="chessCtrlBtn danger" data-testid="chess-new-btn" onclick="chessNewGame(true)">⟳ NEW</button>
+                <button class="closeX" data-testid="chess-close-btn" onclick="closeChess()">✕</button>
+            </div>
+        </div>
+        <div class="chessBody">
+            <div class="chessLeft">
+                <div class="chessCapRow" id="chessCapBlack" title="Pieces you captured"></div>
+                <div id="chessBoardWrap">
+                    <div id="chessBoard" data-testid="chess-board"></div>
+                    <div class="chessGameOver" id="chessGameOver">
+                        <div class="goTitle" id="chessGoTitle">CHECKMATE</div>
+                        <div class="goSub" id="chessGoSub">White wins</div>
+                        <button class="chessCtrlBtn" onclick="chessNewGame(true)" style="margin-top:8px;padding:10px 24px;">NEW GAME</button>
+                    </div>
+                    <div id="chessPromoDialog">
+                        <div class="chessPromoBox">
+                            <div class="ttl">PROMOTE PAWN</div>
+                            <div class="chessPromoRow" id="chessPromoRow"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chessCapRow" id="chessCapWhite" title="Pieces AI captured"></div>
+            </div>
+            <div class="chessRight">
+                <div class="chessCard">
+                    <h4>GAME</h4>
+                    <div class="chessTurnRow"><span><span class="chessTurnDot white" id="chessTurnDot"></span><span id="chessTurnLabel">White to move</span></span><span id="chessMoveCount" style="opacity:.6;font-size:12px;">Move 1</span></div>
+                    <div style="margin-top:8px;font-size:12px;opacity:.7;height:16px;" id="chessThinking"></div>
+                </div>
+                <div class="chessHistWrap">
+                    <h4>MOVE HISTORY</h4>
+                    <div id="chessHistory"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="ttEditOverlay" class="overlay">
     <div class="modal timetableModal">
         <button
@@ -2573,19 +2693,16 @@ img {
 ============================================================ -->
 <div id="customThemeOverlay" class="custom-theme-overlay">
     <div class="custom-theme-panel">
-
         <div class="custom-theme-head">
             <div>
                 <div class="custom-theme-title">CUSTOM THEME</div>
                 <div class="custom-theme-sub">Build your own Stream Hub colour scheme</div>
             </div>
-
             <button
                 class="custom-theme-close"
                 onclick="closeCustomTheme()"
             >✕</button>
         </div>
-
         <div class="custom-theme-preview" id="customThemePreview">
             <div class="custom-theme-preview-inner">
                 <div class="custom-theme-preview-title">
@@ -2599,19 +2716,15 @@ img {
                 </button>
             </div>
         </div>
-
         <div class="custom-theme-controls">
-
             <div class="custom-theme-control">
                 <label>BACKGROUND</label>
-
                 <div class="custom-color-row">
                     <input
                         type="color"
                         id="customBgColor"
                         value="#020617"
                     >
-
                     <input
                         type="text"
                         id="customBgHex"
@@ -2620,17 +2733,14 @@ img {
                     >
                 </div>
             </div>
-
             <div class="custom-theme-control">
                 <label>ACCENT</label>
-
                 <div class="custom-color-row">
                     <input
                         type="color"
                         id="customAccentColor"
                         value="#3b82f6"
                     >
-
                     <input
                         type="text"
                         id="customAccentHex"
@@ -2639,17 +2749,14 @@ img {
                     >
                 </div>
             </div>
-
             <div class="custom-theme-control">
                 <label>GRADIENT</label>
-
                 <div class="custom-color-row">
                     <input
                         type="color"
                         id="customGradientColor"
                         value="#0f172a"
                     >
-
                     <input
                         type="text"
                         id="customGradientHex"
@@ -2658,27 +2765,21 @@ img {
                     >
                 </div>
             </div>
-
         </div>
-
         <div class="custom-theme-actions">
-
             <button
                 class="custom-theme-reset"
                 onclick="resetCustomTheme()"
             >
                 RESET
             </button>
-
             <button
                 class="custom-theme-apply"
                 onclick="applyCustomTheme()"
             >
                 APPLY THEME
             </button>
-
         </div>
-
     </div>
 </div>
 <!-- ============================================================
@@ -2720,15 +2821,11 @@ try{
 }
 console.log("🧪 UPDATE SYSTEM TEST");
 console.log("ipcRenderer exists:", !!ipcRenderer);
-
 if (ipcRenderer) {
     ipcRenderer.on("update-downloaded", (event, info) => {
         console.log("🧪 STREAM.HTML RECEIVED update-downloaded:", info);
-
         const popup = document.getElementById("updatePopup");
-
         console.log("🧪 Popup element:", popup);
-
         if (popup) {
             popup.style.display = "flex";
             console.log("🧪 POPUP SHOULD NOW BE VISIBLE");
@@ -2908,75 +3005,50 @@ document.querySelectorAll('.themeDot').forEach(d=>{
 /* ============================================================
    CUSTOM THEME SYSTEM
 ============================================================ */
-
 const DEFAULT_CUSTOM_THEME = {
     bg: '#020617',
     accent: '#3b82f6',
     gradient: '#0f172a'
 };
-
 let customTheme = {
     ...DEFAULT_CUSTOM_THEME,
     ...(LS.get('customTheme', {}) || {})
 };
-
 function openCustomTheme(){
-
     const overlay = document.getElementById('customThemeOverlay');
-
     if(!overlay) return;
-
     document.getElementById('customBgColor').value =
         customTheme.bg;
-
     document.getElementById('customBgHex').value =
         customTheme.bg;
-
     document.getElementById('customAccentColor').value =
         customTheme.accent;
-
     document.getElementById('customAccentHex').value =
         customTheme.accent;
-
     document.getElementById('customGradientColor').value =
         customTheme.gradient;
-
     document.getElementById('customGradientHex').value =
         customTheme.gradient;
-
     updateCustomThemePreview();
-
     overlay.classList.add('show');
-
     beep(900);
 }
-
 function closeCustomTheme(){
-
     const overlay =
         document.getElementById('customThemeOverlay');
-
     if(!overlay) return;
-
     overlay.classList.remove('show');
-
     beep(500);
 }
-
 function updateCustomThemePreview(){
-
     const bg =
         document.getElementById('customBgColor').value;
-
     const accent =
         document.getElementById('customAccentColor').value;
-
     const gradient =
         document.getElementById('customGradientColor').value;
-
     const preview =
         document.getElementById('customThemePreview');
-
     preview.style.setProperty('--custom-bg', bg);
     preview.style.setProperty('--custom-accent', accent);
     preview.style.setProperty('--custom-gradient', gradient);
@@ -6339,7 +6411,6 @@ function getUserName() {
 function buildSystemPrompt(){
     const AI_USER_NAME = getUserName();
     const now = new Date();
-
     const timeStr = now.toLocaleTimeString('en-NZ');
     const dateStr = now.toLocaleDateString('en-NZ', {
         weekday:'long',
@@ -6347,13 +6418,10 @@ function buildSystemPrompt(){
         month:'long',
         year:'numeric'
     });
-
     const weekLabel = getWeek() === 'week1' ? 'Week 1' : 'Week 2';
-
     /* ---------- CURRENT / NEXT PERIOD ---------- */
     const cur = getCurrentSlot();
     const nxt = getNextSlot();
-
     const curStr = cur
         ? (
             cur.isBreak
@@ -6361,35 +6429,26 @@ function buildSystemPrompt(){
                 : `${subjectFull[cur.subject] || cur.subject} until ${fmt(cur.slot.end)} (${Math.ceil(cur.remaining)} min left)`
           )
         : 'No current class';
-
     const nxtStr = nxt
         ? `${subjectFull[nxt.subject] || nxt.subject} at ${fmt(nxt.slot.start)} (in ${Math.ceil(nxt.untilStart)} min)`
         : 'No more classes today';
-
     /* ---------- TODAY'S SCHEDULE ---------- */
     const layout = getDayLayout();
-
     let schedStr = 'No classes today (weekend or no layout).';
-
     if(layout){
         const subs = timetable[getWeek()][layout.day];
-
         schedStr = layout.layout.map((s,i)=>{
             const si = layout.subjectIdx[i];
-
             const subj =
                 si !== null
                     ? (subjectFull[subs[si]] || subs[si])
                     : (s.label || s.name);
-
             return `  ${fmt(s.start)}–${fmt(s.end)}: ${subj}`;
         }).join('\n');
     }
-
     /* ---------- ASSIGNMENTS ---------- */
     const pending = state.assignments.filter(a => !a.done);
     const done = state.assignments.filter(a => a.done);
-
     const assignStr = pending.length === 0
         ? 'No pending assignments.'
         : pending
@@ -6397,19 +6456,16 @@ function buildSystemPrompt(){
                 `  • ${a.text}${a.due ? ` (due ${a.due})` : ''}`
             )
             .join('\n');
-
     /* ---------- FOCUS TIMER ---------- */
     const focusStr =
         `${focus.mode === 'work' ? 'Work session' : 'Break'}, ` +
         `${Math.floor(focus.secs / 60)}:${String(focus.secs % 60).padStart(2,'0')} remaining, ` +
         `${focus.done} session${focus.done === 1 ? '' : 's'} completed today, ` +
         `timer is ${focus.running ? 'RUNNING' : 'paused'}`;
-
     /* ---------- WEATHER ---------- */
     const wxStr = lastWeather.temp !== null
         ? `${lastWeather.icon} ${lastWeather.temp}°C, ${lastWeather.desc}`
         : 'Weather not loaded yet.';
-
     /* ============================================================
        LIVE ATTENDANCE — SAME DATA AS ATTENDANCE CARD
     ============================================================ */
@@ -6420,34 +6476,27 @@ function buildSystemPrompt(){
         'thursday',
         'friday'
     ];
-
     const attendanceToday = todayKey();
-
     const attendanceTodayIndex =
         attendanceToday
             ? attendanceDayOrder.indexOf(attendanceToday)
             : attendanceDayOrder.length - 1;
-
     let attendancePresent = 0;
     let attendanceElapsed = 0;
-
     attendanceDayOrder.forEach((day, i) => {
         if(i <= attendanceTodayIndex){
             attendanceElapsed++;
-
             if(state.attendance.days[day]){
                 attendancePresent++;
             }
         }
     });
-
     const attendancePercent =
         attendanceElapsed > 0
             ? Math.round(
                 (attendancePresent / attendanceElapsed) * 100
               )
             : 100;
-
     const attendanceAbsences =
         attendanceElapsed - attendancePresent;
     /* ============================================================
@@ -6539,11 +6588,9 @@ function buildStudySystemPrompt(){
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-NZ', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     const timeStr = now.toLocaleTimeString('en-NZ');
-
     const lvl = ai.study.level || 2;
     const focusSubject = ai.study.subject || '';
     const subjectList = getStudySubjectList();
-
     // Timetable subjects (codes -> full names)
     let timetableSubs = 'None detected.';
     try{
@@ -6564,22 +6611,17 @@ function buildStudySystemPrompt(){
         }
         if(found.size) timetableSubs = Array.from(found).sort().join('\n');
     }catch(e){}
-
     /* Pending assignments (short list) */
     const pending = (state.assignments || []).filter(a => !a.done);
     const assignStr = pending.length === 0
         ? 'No pending assignments.'
         : pending.map(a => `  • ${a.text}${a.due ? ` (due ${a.due})` : ''}`).join('\n');
-
     /* Credits snapshot */
     const creditTotal = state.credits.excellence + state.credits.merit + state.credits.achieved;
-
     return `You are Study AI, a focused NCEA study tutor embedded in "Stream Hub" — used by ${AI_USER_NAME}, a New Zealand high school student.
 You help with NCEA Levels 1, 2 and 3. You know NZQA structure (Achievement Standards, Achieved / Merit / Excellence grades) and can point students to NZQA past-paper resources.
-
 CURRENT DATE & TIME:
 ${dateStr}, ${timeStr}
-
 STUDENT CONTEXT:
 - Active NCEA Level: L${lvl}
 - Focus subject: ${focusSubject || '(none — general study)'}
@@ -6589,14 +6631,12 @@ ${timetableSubs}
 - Pending assignments:
 ${assignStr}
 - Current NCEA credits earned: ${creditTotal} (Excellence ${state.credits.excellence}, Merit ${state.credits.merit}, Achieved ${state.credits.achieved})
-
 NZQA PAST-PAPER LINKS:
 - General NZQA past-paper search: https://www.nzqa.govt.nz/qualifications-standards/qualifications/ncea/subjects/
 - Level 1: https://www.nzqa.govt.nz/ncea/subjects/?level=01
 - Level 2: https://www.nzqa.govt.nz/ncea/subjects/?level=02
 - Level 3: https://www.nzqa.govt.nz/ncea/subjects/?level=03
 When the student asks for past papers, give the most relevant NZQA link based on their level and subject, plus a short "search this on NZQA" query.
-
 INSTRUCTIONS:
 - Stay in Study Mode. Focus purely on study, revision, concepts, past papers, exam technique, and NCEA guidance.
 - Match the student's active level (L${lvl}) unless they explicitly ask for another level.
@@ -7251,6 +7291,447 @@ function applyDefaultIconsToTimetable(){
         }
     }
 }
+/* ============================================================
+   STREAM CHESS ENGINE
+   Full rules: castling, en passant, promotion, checkmate/stalemate
+   AI: Negamax with alpha-beta pruning + piece-square tables
+   Persistence: localStorage
+   ============================================================ */
+(function(){
+  const GLYPH = {wK:'\u2654',wQ:'\u2655',wR:'\u2656',wB:'\u2657',wN:'\u2658',wP:'\u2659',
+                 bK:'\u265A',bQ:'\u265B',bR:'\u265C',bB:'\u265D',bN:'\u265E',bP:'\u265F'};
+  const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const FILES = 'abcdefgh';
+  const PIECE_VAL = {P:100,N:320,B:330,R:500,Q:900,K:20000};
+  const PST = {
+    P:[0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 10,10,20,30,30,20,10,10, 5,5,10,25,25,10,5,5, 0,0,0,20,20,0,0,0, 5,-5,-10,0,0,-10,-5,5, 5,10,10,-20,-20,10,10,5, 0,0,0,0,0,0,0,0],
+    N:[-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,0,0,0,0,-20,-40, -30,0,10,15,15,10,0,-30, -30,5,15,20,20,15,5,-30, -30,0,15,20,20,15,0,-30, -30,5,10,15,15,10,5,-30, -40,-20,0,5,5,0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50],
+    B:[-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10, -10,5,5,10,10,5,5,-10, -10,0,10,10,10,10,0,-10, -10,10,10,10,10,10,10,-10, -10,5,0,0,0,0,5,-10, -20,-10,-10,-10,-10,-10,-10,-20],
+    R:[0,0,0,0,0,0,0,0, 5,10,10,10,10,10,10,5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, 0,0,0,5,5,0,0,0],
+    Q:[-20,-10,-10,-5,-5,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,5,5,5,0,-10, -5,0,5,5,5,5,0,-5, 0,0,5,5,5,5,0,-5, -10,5,5,5,5,5,0,-10, -10,0,5,0,0,0,0,-10, -20,-10,-10,-5,-5,-10,-10,-20],
+    K:[-30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -20,-30,-30,-40,-40,-30,-30,-20, -10,-20,-20,-20,-20,-20,-20,-10, 20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]
+  };
+  let state = null, history = [], selected = null, legalTargets = [];
+  let orientation = 'white', difficulty = 2, aiThinking = false, lastMoveHi = null;
+  function idx(r,c){ return r*8 + c; }
+  function rc(i){ return [Math.floor(i/8), i%8]; }
+  function sq(i){ const [r,c]=rc(i); return FILES[c] + (8-r); }
+  function inside(r,c){ return r>=0&&r<8&&c>=0&&c<8; }
+  function cloneState(s){ return {board:s.board.slice(),turn:s.turn,castling:{...s.castling},ep:s.ep,halfmove:s.halfmove,fullmove:s.fullmove}; }
+  function fenToState(fen){
+    const parts = fen.split(' ');
+    const board = new Array(64).fill(null); let i = 0;
+    for(const ch of parts[0]){
+      if(ch === '/') continue;
+      if(/[1-8]/.test(ch)){ i += parseInt(ch); continue; }
+      const color = ch === ch.toUpperCase() ? 'w' : 'b';
+      board[i++] = color + ch.toUpperCase();
+    }
+    const cast = {wK:parts[2].includes('K'),wQ:parts[2].includes('Q'),bK:parts[2].includes('k'),bQ:parts[2].includes('q')};
+    let ep = null;
+    if(parts[3] !== '-'){ const f = FILES.indexOf(parts[3][0]); const r = 8 - parseInt(parts[3][1]); ep = idx(r,f); }
+    return {board,turn:parts[1],castling:cast,ep,halfmove:parseInt(parts[4]||0),fullmove:parseInt(parts[5]||1)};
+  }
+  const SLIDE = {R:[[-1,0],[1,0],[0,-1],[0,1]], B:[[-1,-1],[-1,1],[1,-1],[1,1]]};
+  SLIDE.Q = SLIDE.R.concat(SLIDE.B);
+  const KNIGHT = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+  const KING = SLIDE.Q;
+  function generatePseudoMoves(s, color){
+    const moves = [];
+    for(let i=0;i<64;i++){
+      const p = s.board[i]; if(!p || p[0] !== color) continue;
+      const [r,c] = rc(i); const type = p[1];
+      if(type === 'P'){
+        const dir = color === 'w' ? -1 : 1;
+        const startR = color === 'w' ? 6 : 1;
+        const promoR = color === 'w' ? 0 : 7;
+        if(inside(r+dir,c) && !s.board[idx(r+dir,c)]){
+          if(r+dir === promoR){ for(const pr of ['Q','R','B','N']) moves.push({from:i,to:idx(r+dir,c),promo:pr}); }
+          else moves.push({from:i,to:idx(r+dir,c)});
+          if(r === startR && !s.board[idx(r+2*dir,c)]) moves.push({from:i,to:idx(r+2*dir,c),double:true});
+        }
+        for(const dc of [-1,1]){
+          const nr=r+dir,nc=c+dc; if(!inside(nr,nc)) continue;
+          const t=idx(nr,nc), tp=s.board[t];
+          if(tp && tp[0] !== color){
+            if(nr === promoR){ for(const pr of ['Q','R','B','N']) moves.push({from:i,to:t,promo:pr,capture:true}); }
+            else moves.push({from:i,to:t,capture:true});
+          } else if(t === s.ep){ moves.push({from:i,to:t,ep:true,capture:true}); }
+        }
+      } else if(type === 'N'){
+        for(const [dr,dc] of KNIGHT){
+          const nr=r+dr,nc=c+dc; if(!inside(nr,nc)) continue;
+          const t=idx(nr,nc), tp=s.board[t];
+          if(!tp || tp[0] !== color) moves.push({from:i,to:t,capture:!!tp});
+        }
+      } else if(type === 'B' || type === 'R' || type === 'Q'){
+        for(const [dr,dc] of SLIDE[type]){
+          let nr=r+dr,nc=c+dc;
+          while(inside(nr,nc)){
+            const t=idx(nr,nc), tp=s.board[t];
+            if(!tp){ moves.push({from:i,to:t}); }
+            else{ if(tp[0] !== color) moves.push({from:i,to:t,capture:true}); break; }
+            nr+=dr; nc+=dc;
+          }
+        }
+      } else if(type === 'K'){
+        for(const [dr,dc] of KING){
+          const nr=r+dr,nc=c+dc; if(!inside(nr,nc)) continue;
+          const t=idx(nr,nc), tp=s.board[t];
+          if(!tp || tp[0] !== color) moves.push({from:i,to:t,capture:!!tp});
+        }
+        if(color === 'w' && r === 7 && c === 4){
+          if(s.castling.wK && !s.board[idx(7,5)] && !s.board[idx(7,6)] && s.board[idx(7,7)] === 'wR'
+             && !sqAttacked(s,idx(7,4),'b') && !sqAttacked(s,idx(7,5),'b') && !sqAttacked(s,idx(7,6),'b'))
+            moves.push({from:i,to:idx(7,6),castle:'K'});
+          if(s.castling.wQ && !s.board[idx(7,3)] && !s.board[idx(7,2)] && !s.board[idx(7,1)] && s.board[idx(7,0)] === 'wR'
+             && !sqAttacked(s,idx(7,4),'b') && !sqAttacked(s,idx(7,3),'b') && !sqAttacked(s,idx(7,2),'b'))
+            moves.push({from:i,to:idx(7,2),castle:'Q'});
+        } else if(color === 'b' && r === 0 && c === 4){
+          if(s.castling.bK && !s.board[idx(0,5)] && !s.board[idx(0,6)] && s.board[idx(0,7)] === 'bR'
+             && !sqAttacked(s,idx(0,4),'w') && !sqAttacked(s,idx(0,5),'w') && !sqAttacked(s,idx(0,6),'w'))
+            moves.push({from:i,to:idx(0,6),castle:'K'});
+          if(s.castling.bQ && !s.board[idx(0,3)] && !s.board[idx(0,2)] && !s.board[idx(0,1)] && s.board[idx(0,0)] === 'bR'
+             && !sqAttacked(s,idx(0,4),'w') && !sqAttacked(s,idx(0,3),'w') && !sqAttacked(s,idx(0,2),'w'))
+            moves.push({from:i,to:idx(0,2),castle:'Q'});
+        }
+      }
+    }
+    return moves;
+  }
+  function sqAttacked(s, sqi, byColor){
+    const [r,c] = rc(sqi);
+    const dir = byColor === 'w' ? 1 : -1;
+    for(const dc of [-1,1]){ const nr=r+dir,nc=c+dc; if(inside(nr,nc) && s.board[idx(nr,nc)] === byColor+'P') return true; }
+    for(const [dr,dc] of KNIGHT){ const nr=r+dr,nc=c+dc; if(inside(nr,nc) && s.board[idx(nr,nc)] === byColor+'N') return true; }
+    for(const [dr,dc] of SLIDE.R){ let nr=r+dr,nc=c+dc; while(inside(nr,nc)){ const p = s.board[idx(nr,nc)]; if(p){ if(p === byColor+'R' || p === byColor+'Q') return true; break; } nr+=dr; nc+=dc; } }
+    for(const [dr,dc] of SLIDE.B){ let nr=r+dr,nc=c+dc; while(inside(nr,nc)){ const p = s.board[idx(nr,nc)]; if(p){ if(p === byColor+'B' || p === byColor+'Q') return true; break; } nr+=dr; nc+=dc; } }
+    for(const [dr,dc] of KING){ const nr=r+dr,nc=c+dc; if(inside(nr,nc) && s.board[idx(nr,nc)] === byColor+'K') return true; }
+    return false;
+  }
+  function findKing(s, color){ for(let i=0;i<64;i++) if(s.board[i] === color+'K') return i; return -1; }
+  function inCheck(s, color){ const k = findKing(s, color); if(k < 0) return false; return sqAttacked(s, k, color === 'w' ? 'b' : 'w'); }
+  function applyMove(s, m){
+    const ns = cloneState(s);
+    const piece = ns.board[m.from]; const color = piece[0], type = piece[1];
+    ns.board[m.from] = null;
+    if(m.ep){ const dir = color === 'w' ? 1 : -1; const [tr,tc] = rc(m.to); ns.board[idx(tr+dir,tc)] = null; }
+    if(m.castle){
+      const rank = color === 'w' ? 7 : 0;
+      if(m.castle === 'K'){ ns.board[idx(rank,5)] = ns.board[idx(rank,7)]; ns.board[idx(rank,7)] = null; }
+      else { ns.board[idx(rank,3)] = ns.board[idx(rank,0)]; ns.board[idx(rank,0)] = null; }
+    }
+    if(m.promo){ ns.board[m.to] = color + m.promo; } else { ns.board[m.to] = piece; }
+    if(type === 'K'){ if(color==='w'){ns.castling.wK=false;ns.castling.wQ=false;} else {ns.castling.bK=false;ns.castling.bQ=false;} }
+    if(m.from === idx(7,0) || m.to === idx(7,0)) ns.castling.wQ = false;
+    if(m.from === idx(7,7) || m.to === idx(7,7)) ns.castling.wK = false;
+    if(m.from === idx(0,0) || m.to === idx(0,0)) ns.castling.bQ = false;
+    if(m.from === idx(0,7) || m.to === idx(0,7)) ns.castling.bK = false;
+    ns.ep = null;
+    if(m.double){ const [fr,fc]=rc(m.from); const dir = color === 'w' ? -1 : 1; ns.ep = idx(fr+dir, fc); }
+    if(type === 'P' || m.capture) ns.halfmove = 0; else ns.halfmove++;
+    if(color === 'b') ns.fullmove++;
+    ns.turn = color === 'w' ? 'b' : 'w';
+    return ns;
+  }
+  function generateLegalMoves(s){
+    const moves = generatePseudoMoves(s, s.turn);
+    return moves.filter(m => { const ns = applyMove(s, m); return !inCheck(ns, s.turn); });
+  }
+  function isCheckmate(s){ return inCheck(s, s.turn) && generateLegalMoves(s).length === 0; }
+  function isStalemate(s){ return !inCheck(s, s.turn) && generateLegalMoves(s).length === 0; }
+  function isInsufficientMaterial(s){
+    const pieces = s.board.filter(p => p);
+    if(pieces.length === 2) return true;
+    if(pieces.length === 3){ const nonK = pieces.filter(p => p[1] !== 'K'); if(nonK.length === 1 && (nonK[0][1] === 'B' || nonK[0][1] === 'N')) return true; }
+    return false;
+  }
+  function evaluate(s){
+    let score = 0;
+    for(let i=0;i<64;i++){
+      const p = s.board[i]; if(!p) continue;
+      const [r,c] = rc(i); const val = PIECE_VAL[p[1]];
+      const pstIdx = p[0] === 'w' ? idx(r,c) : idx(7-r,c);
+      score += (p[0] === 'w' ? 1 : -1) * (val + PST[p[1]][pstIdx]);
+    }
+    return s.turn === 'w' ? score : -score;
+  }
+  function search(s, depth, alpha, beta){
+    if(depth === 0) return evaluate(s);
+    const moves = generateLegalMoves(s);
+    if(moves.length === 0){ if(inCheck(s, s.turn)) return -99999 - depth; return 0; }
+    moves.sort((a,b) => (b.capture?1:0) - (a.capture?1:0));
+    let best = -Infinity;
+    for(const m of moves){
+      const ns = applyMove(s, m);
+      const score = -search(ns, depth - 1, -beta, -alpha);
+      if(score > best) best = score;
+      if(best > alpha) alpha = best;
+      if(alpha >= beta) break;
+    }
+    return best;
+  }
+  function pickAIMove(s, depth){
+    const moves = generateLegalMoves(s); if(moves.length === 0) return null;
+    moves.sort((a,b) => (b.capture?1:0) - (a.capture?1:0));
+    let best = -Infinity, bestMoves = []; let alpha = -Infinity, beta = Infinity;
+    for(const m of moves){
+      const ns = applyMove(s, m);
+      const score = -search(ns, depth - 1, -beta, -alpha);
+      if(score > best){ best = score; bestMoves = [m]; }
+      else if(score === best) bestMoves.push(m);
+      if(best > alpha) alpha = best;
+    }
+    if(depth <= 1 && bestMoves.length > 1) return bestMoves[Math.floor(Math.random()*bestMoves.length)];
+    return bestMoves[0];
+  }
+  function toSAN(s, m){
+    const piece = s.board[m.from]; const type = piece[1]; let san = '';
+    if(m.castle) return m.castle === 'K' ? 'O-O' : 'O-O-O';
+    if(type !== 'P') san += type;
+    if(type !== 'P' && type !== 'K'){
+      const others = generateLegalMoves(s).filter(x => x.to === m.to && x.from !== m.from && s.board[x.from] === piece);
+      if(others.length > 0){
+        const [fr,fc] = rc(m.from);
+        const sameFile = others.some(x => rc(x.from)[1] === fc);
+        const sameRank = others.some(x => rc(x.from)[0] === fr);
+        if(!sameFile) san += FILES[fc]; else if(!sameRank) san += (8-fr); else san += FILES[fc] + (8-fr);
+      }
+    }
+    if(m.capture){ if(type === 'P') san += FILES[rc(m.from)[1]]; san += 'x'; }
+    san += sq(m.to);
+    if(m.promo) san += '=' + m.promo;
+    const ns = applyMove(s, m);
+    if(inCheck(ns, ns.turn)){ san += generateLegalMoves(ns).length === 0 ? '#' : '+'; }
+    return san;
+  }
+  function render(){
+    const board = document.getElementById('chessBoard'); if(!board) return;
+    board.innerHTML = '';
+    const kingChecked = inCheck(state, state.turn) ? findKing(state, state.turn) : -1;
+    for(let vr=0; vr<8; vr++){
+      for(let vc=0; vc<8; vc++){
+        const r = orientation === 'white' ? vr : 7 - vr;
+        const c = orientation === 'white' ? vc : 7 - vc;
+        const i = idx(r,c);
+        const sqEl = document.createElement('div');
+        sqEl.className = 'chessSq ' + ((r+c) % 2 === 0 ? 'light' : 'dark');
+        sqEl.dataset.idx = i; sqEl.dataset.testid = 'sq-' + sq(i);
+        const p = state.board[i];
+        if(p){
+          sqEl.classList.add(p[0] === 'w' ? 'wPiece' : 'bPiece');
+          const span = document.createElement('span'); span.className = 'piece'; span.textContent = GLYPH[p]; sqEl.appendChild(span);
+        }
+        if(selected === i) sqEl.classList.add('selected');
+        if(legalTargets.some(m => m.to === i)) sqEl.classList.add(p ? 'captureTarget' : 'moveTarget');
+        if(lastMoveHi && (lastMoveHi.from === i || lastMoveHi.to === i)) sqEl.classList.add('lastMove');
+        if(i === kingChecked) sqEl.classList.add('check');
+        if(vc === 0){ const rl = document.createElement('span'); rl.className = 'coord rank'; rl.textContent = 8 - r; sqEl.appendChild(rl); }
+        if(vr === 7){ const fl = document.createElement('span'); fl.className = 'coord file'; fl.textContent = FILES[c]; sqEl.appendChild(fl); }
+        sqEl.addEventListener('click', () => onSquareClick(i));
+        board.appendChild(sqEl);
+      }
+    }
+    document.getElementById('chessTurnLabel').textContent = aiThinking ? 'AI thinking...' : (state.turn === 'w' ? 'Your move (White)' : 'AI to move (Black)');
+    const dot = document.getElementById('chessTurnDot'); dot.className = 'chessTurnDot ' + (state.turn === 'w' ? 'white' : 'black');
+    document.getElementById('chessMoveCount').textContent = 'Move ' + state.fullmove;
+    renderCaptured(); renderHistory(); updateStatusBadge();
+  }
+  function renderCaptured(){
+    const start = {wP:8,wN:2,wB:2,wR:2,wQ:1,wK:1,bP:8,bN:2,bB:2,bR:2,bQ:1,bK:1};
+    const cur = {}; for(const p of state.board) if(p) cur[p] = (cur[p]||0)+1;
+    let capBlack = '', capWhite = '';
+    for(const [p,n] of Object.entries(start)){
+      const c = cur[p] || 0; const missing = n - c;
+      if(missing > 0){ const g = GLYPH[p].repeat(missing); if(p[0] === 'b') capBlack += g; else capWhite += g; }
+    }
+    const capB = document.getElementById('chessCapBlack'), capW = document.getElementById('chessCapWhite');
+    if(orientation === 'white'){
+      capB.textContent = capBlack; capB.style.color = '#111'; capB.style.textShadow = '0 0 1px #fff';
+      capW.textContent = capWhite; capW.style.color = '#fff'; capW.style.textShadow = '0 0 2px #000';
+    } else {
+      capB.textContent = capWhite; capB.style.color = '#fff'; capB.style.textShadow = '0 0 2px #000';
+      capW.textContent = capBlack; capW.style.color = '#111'; capW.style.textShadow = '0 0 1px #fff';
+    }
+  }
+  function renderHistory(){
+    const el = document.getElementById('chessHistory'); if(!el) return; el.innerHTML = '';
+    for(let i=0;i<history.length;i+=2){
+      const n = Math.floor(i/2) + 1;
+      const numEl = document.createElement('div'); numEl.className='num'; numEl.textContent = n + '.';
+      const wEl = document.createElement('div'); wEl.className='mv'; wEl.textContent = history[i]?.san || '';
+      const bEl = document.createElement('div'); bEl.className='mv'; bEl.textContent = history[i+1]?.san || '';
+      el.appendChild(numEl); el.appendChild(wEl); el.appendChild(bEl);
+    }
+    el.parentElement.scrollTop = el.parentElement.scrollHeight;
+  }
+  function updateStatusBadge(){
+    const b = document.getElementById('chessStatusBadge'); if(!b) return;
+    if(isCheckmate(state)){ b.textContent = 'CHECKMATE'; b.className = 'aiBadge offline'; }
+    else if(isStalemate(state)){ b.textContent = 'STALEMATE'; b.className = 'aiBadge offline'; }
+    else if(isInsufficientMaterial(state)){ b.textContent = 'DRAW'; b.className = 'aiBadge offline'; }
+    else if(inCheck(state, state.turn)){ b.textContent = 'CHECK'; b.className = 'aiBadge offline'; }
+    else if(aiThinking){ b.textContent = 'AI'; b.className = 'aiBadge live'; }
+    else { b.textContent = state.turn === 'w' ? 'YOUR TURN' : 'AI TURN'; b.className = 'aiBadge live'; }
+  }
+  function checkGameEnd(){
+    let title = null, sub = '';
+    if(isCheckmate(state)){ title = 'CHECKMATE'; sub = state.turn === 'w' ? 'AI (Black) wins' : 'You win!'; }
+    else if(isStalemate(state)){ title = 'STALEMATE'; sub = 'Draw'; }
+    else if(isInsufficientMaterial(state)){ title = 'DRAW'; sub = 'Insufficient material'; }
+    else if(state.halfmove >= 100){ title = 'DRAW'; sub = '50-move rule'; }
+    if(title){
+      document.getElementById('chessGoTitle').textContent = title;
+      document.getElementById('chessGoSub').textContent = sub;
+      document.getElementById('chessGameOver').classList.add('show');
+      return true;
+    }
+    document.getElementById('chessGameOver').classList.remove('show');
+    return false;
+  }
+  function onSquareClick(i){
+    if(aiThinking || state.turn !== 'w') return;
+    if(checkGameEnd()) return;
+    const p = state.board[i];
+    if(selected === i){ selected = null; legalTargets = []; render(); return; }
+    if(p && p[0] === 'w'){
+      selected = i;
+      legalTargets = generateLegalMoves(state).filter(m => m.from === i);
+      render(); return;
+    }
+    if(selected !== null){
+      const move = legalTargets.find(m => m.to === i);
+      if(move){
+        if(move.promo){ promptPromotion('w').then(promoPiece => doMove({...move, promo: promoPiece})); }
+        else doMove(move);
+      } else { selected = null; legalTargets = []; render(); }
+    }
+  }
+  function promptPromotion(color){
+    return new Promise(resolve => {
+      const row = document.getElementById('chessPromoRow'); row.innerHTML = '';
+      for(const pt of ['Q','R','B','N']){
+        const b = document.createElement('button');
+        b.className = 'chessPromoBtn'; b.textContent = GLYPH[color + pt];
+        b.style.color = color === 'w' ? '#fff' : '#000';
+        b.style.textShadow = color === 'w' ? '0 0 2px #000,0 0 2px #000,0 0 2px #000' : '0 0 1px #fff';
+        b.onclick = () => { document.getElementById('chessPromoDialog').classList.remove('show'); resolve(pt); };
+        row.appendChild(b);
+      }
+      document.getElementById('chessPromoDialog').classList.add('show');
+    });
+  }
+  function doMove(m){
+    const san = toSAN(state, m);
+    history.push({san, from:m.from, to:m.to, prevFen:stateToFen(state), move:m});
+    state = applyMove(state, m);
+    lastMoveHi = {from:m.from,to:m.to};
+    selected = null; legalTargets = [];
+    saveGame(); render();
+    if(checkGameEnd()) return;
+    if(state.turn === 'b'){
+      aiThinking = true; updateStatusBadge();
+      document.getElementById('chessThinking').textContent = 'AI is calculating...';
+      setTimeout(() => {
+        const aiMove = pickAIMove(state, difficulty);
+        aiThinking = false;
+        document.getElementById('chessThinking').textContent = '';
+        if(aiMove){
+          const asan = toSAN(state, aiMove);
+          history.push({san:asan, from:aiMove.from, to:aiMove.to, prevFen:stateToFen(state), move:aiMove});
+          state = applyMove(state, aiMove);
+          lastMoveHi = {from:aiMove.from,to:aiMove.to};
+        }
+        saveGame(); render(); checkGameEnd();
+      }, 200);
+    }
+  }
+  function stateToFen(s){
+    let fen = '';
+    for(let r=0;r<8;r++){
+      let empty = 0;
+      for(let c=0;c<8;c++){
+        const p = s.board[idx(r,c)];
+        if(!p){ empty++; continue; }
+        if(empty){ fen += empty; empty = 0; }
+        fen += p[0] === 'w' ? p[1] : p[1].toLowerCase();
+      }
+      if(empty) fen += empty; if(r < 7) fen += '/';
+    }
+    fen += ' ' + s.turn + ' ';
+    let cst = ''; if(s.castling.wK)cst+='K';if(s.castling.wQ)cst+='Q';if(s.castling.bK)cst+='k';if(s.castling.bQ)cst+='q';
+    fen += (cst || '-') + ' ' + (s.ep !== null ? sq(s.ep) : '-') + ' ' + s.halfmove + ' ' + s.fullmove;
+    return fen;
+  }
+  const STORAGE_KEY = 'streamHubChess.v1';
+  function saveGame(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        fen: stateToFen(state),
+        history: history.map(h => ({san:h.san, from:h.from, to:h.to, prevFen:h.prevFen, move:h.move})),
+        difficulty, orientation, lastMoveHi
+      }));
+    }catch(e){}
+  }
+  function loadGame(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return false;
+      const data = JSON.parse(raw);
+      state = fenToState(data.fen); history = data.history || [];
+      difficulty = data.difficulty || 2; orientation = data.orientation || 'white';
+      lastMoveHi = data.lastMoveHi || null;
+      document.querySelectorAll('.chessDiff button').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.diff) === difficulty); });
+      return true;
+    }catch(e){ return false; }
+  }
+  window.openChess = function(){
+    document.getElementById('chessOverlay').classList.add('show');
+    if(!state){ if(!loadGame()){ state = fenToState(START_FEN); history = []; } }
+    render(); checkGameEnd();
+    if(typeof beep === 'function') try{beep(700);}catch(e){}
+  };
+  window.closeChess = function(){ document.getElementById('chessOverlay').classList.remove('show'); saveGame(); };
+  window.chessNewGame = function(confirmFirst){
+    if(confirmFirst && history.length > 0 && !confirm('Start a new game? Current game will be lost.')) return;
+    state = fenToState(START_FEN); history = []; selected = null; legalTargets = []; lastMoveHi = null; aiThinking = false;
+    document.getElementById('chessGameOver').classList.remove('show');
+    document.getElementById('chessThinking').textContent = '';
+    saveGame(); render();
+  };
+  window.chessUndo = function(){
+    if(aiThinking || history.length === 0) return;
+    let popped = history.pop(); if(popped) state = fenToState(popped.prevFen);
+    if(state.turn === 'w' && history.length > 0){ popped = history.pop(); if(popped) state = fenToState(popped.prevFen); }
+    lastMoveHi = history.length > 0 ? {from:history[history.length-1].from,to:history[history.length-1].to} : null;
+    selected = null; legalTargets = [];
+    document.getElementById('chessGameOver').classList.remove('show');
+    saveGame(); render();
+  };
+  window.chessFlipBoard = function(){ orientation = orientation === 'white' ? 'black' : 'white'; saveGame(); render(); };
+  window.chessSetDifficulty = function(d){
+    difficulty = d;
+    document.querySelectorAll('.chessDiff button').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.diff) === d); });
+    saveGame();
+  };
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && document.getElementById('chessOverlay').classList.contains('show')) closeChess();
+  });
+})();
+// Register in the command palette
+if(typeof commands !== 'undefined'){
+  commands.push({label:'Open Chess', kbd:'C', run:openChess});
+}
+// Keyboard shortcut: press "C" (when not typing) to open chess
+document.addEventListener('keydown', e => {
+  const tag = (e.target && e.target.tagName) || '';
+  if(tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  if(e.key && e.key.toLowerCase() === 'c' && !document.getElementById('chessOverlay').classList.contains('show')){
+    const openOverlay = document.querySelector('#aiOverlay.show, #stocksOverlay.show, #palette[style*="flex"]');
+    if(openOverlay) return;
+    openChess();
+  }
+});
 /* ------------------------------------------------------------
    RENDER FULL TIMETABLE (used by init)
    ------------------------------------------------------------ */
@@ -8046,46 +8527,35 @@ async function askStockAI(sym){
 // ============================================================
 // STREAM HUB UPDATE POPUP
 // ============================================================
-
 const updatePopup = document.getElementById("updatePopup");
 const updateVersion = document.getElementById("updateVersion");
 const updateNowBtn = document.getElementById("updateNowBtn");
 const updateLaterBtn = document.getElementById("updateLaterBtn");
-
 // Update is available
 if (ipcRenderer) {
     ipcRenderer.on("update-available", (event, info) => {
         console.log("🚀 UPDATE AVAILABLE:", info.version);
-
         updateVersion.textContent = `Version ${info.version} is available`;
-
         // Don't show yet — wait until the download finishes.
     });
-
     // Download progress
     ipcRenderer.on("update-progress", (event, info) => {
         console.log("⬇️ UPDATE PROGRESS:", info.percent);
-
         updateVersion.textContent =
             `Downloading update... ${Math.round(info.percent)}%`;
     });
-
     // Download finished
     ipcRenderer.on("update-downloaded", (event, info) => {
         console.log("✅ UPDATE DOWNLOADED:", info.version);
-
         updateVersion.textContent =
             `Version ${info.version} is ready`;
-
         updatePopup.style.display = "flex";
     });
-
     // Restart & install
     updateNowBtn.addEventListener("click", () => {
         console.log("🔄 RESTARTING TO INSTALL UPDATE...");
         ipcRenderer.send("install-update");
     });
-
     // Later
     updateLaterBtn.addEventListener("click", () => {
         updatePopup.style.display = "none";
