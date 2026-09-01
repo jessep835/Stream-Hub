@@ -2660,9 +2660,9 @@ img {
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <div class="chessDiff" data-testid="chess-difficulty">
-                    <button data-diff="1" onclick="chessSetDifficulty(1)">EASY</button>
-                    <button data-diff="2" class="active" onclick="chessSetDifficulty(2)">MEDIUM</button>
-                    <button data-diff="3" onclick="chessSetDifficulty(3)">HARD</button>
+                    <button data-diff="1" onclick="chessSetDifficulty(1)">SHEHRYAAR</button>
+                    <button data-diff="2" class="active" onclick="chessSetDifficulty(2)">ADRIEL</button>
+                    <button data-diff="3" onclick="chessSetDifficulty(3)">ZONNY</button>
                 </div>
                 <button class="chessCtrlBtn" data-testid="chess-flip-btn" onclick="chessFlipBoard()">⇅ FLIP</button>
                 <button class="chessCtrlBtn" data-testid="chess-undo-btn" onclick="chessUndo()">↶ UNDO</button>
@@ -10369,5 +10369,542 @@ function toggleSidebar(){
     document.querySelector('.sidebar').classList.toggle('collapsed');
 }
 </script>
+<html>
+    <head>
+        <style>
+            
+/* Shared modal chrome — matches #aiOverlay / #aiPanel language */
+#wordleOverlay,#slopeOverlay{position:fixed;inset:0;background:rgba(0,5,15,.75);backdrop-filter:blur(8px);z-index:9999;display:none;justify-content:center;align-items:center;animation:fadeIn .25s;}
+#wordleOverlay.show,#slopeOverlay.show{display:flex;}
+#wordlePanel,#slopePanel{width:92vw;max-width:1200px;height:88vh;background:rgba(0,10,20,.92);border:1px solid var(--accent);border-radius:18px;box-shadow:0 0 60px var(--accent-glow);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+#wordlePanel .aiHead,#slopePanel .aiHead{padding:14px 20px;border-bottom:1px solid var(--accent-soft);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:12px;flex-wrap:wrap;}
+#wordlePanel .aiHead .ttl,#slopePanel .aiHead .ttl{color:var(--accent);letter-spacing:3px;font-size:14px;text-shadow:0 0 10px var(--accent-glow);display:flex;align-items:center;gap:10px;}
+#wordlePanel .aiHead .orb,#slopePanel .aiHead .orb{width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:pulse 1.6s infinite;}
+#wordlePanel .aiHead .closeX,#slopePanel .aiHead .closeX{cursor:pointer;color:#ff6b6b;font-size:20px;background:none;border:1px solid rgba(255,107,107,.3);border-radius:8px;padding:4px 12px;}
+#wordlePanel .headBtn,#slopePanel .headBtn{padding:6px 14px;background:rgba(0,240,255,.08);border:1px solid var(--accent-soft);border-radius:8px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:1.5px;transition:.2s;text-transform:uppercase;}
+#wordlePanel .headBtn:hover,#slopePanel .headBtn:hover{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+
+/* ---------- WORDLE ---------- */
+#wordleBody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 20px;gap:18px;overflow:auto;}
+#wordleGrid{display:grid;grid-template-rows:repeat(6,1fr);gap:6px;}
+.wRow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.wCell{width:58px;height:58px;border:2px solid rgba(0,240,255,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#e8faff;text-transform:uppercase;background:rgba(0,10,20,.5);transition:transform .2s,background .35s,border-color .35s,color .35s;user-select:none;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;}
+.wCell.filled{border-color:rgba(0,240,255,.55);animation:wPop .12s ease;}
+.wCell.correct{background:#3aa856;border-color:#3aa856;color:#fff;box-shadow:0 0 14px rgba(58,168,86,.45);}
+.wCell.present{background:#c9a13a;border-color:#c9a13a;color:#fff;box-shadow:0 0 12px rgba(201,161,58,.35);}
+.wCell.absent{background:#2b3540;border-color:#2b3540;color:#a9b5c1;}
+.wCell.flip{animation:wFlip .55s ease forwards;}
+@keyframes wPop{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
+@keyframes wFlip{0%{transform:rotateX(0);}45%{transform:rotateX(90deg);}100%{transform:rotateX(0);}}
+.wRow.shake{animation:wShake .45s;}
+@keyframes wShake{10%,90%{transform:translateX(-2px);}20%,80%{transform:translateX(4px);}30%,50%,70%{transform:translateX(-6px);}40%,60%{transform:translateX(6px);}}
+#wordleKeyboard{display:flex;flex-direction:column;gap:6px;width:100%;max-width:520px;margin-top:6px;}
+.wkRow{display:flex;gap:5px;justify-content:center;}
+.wKey{flex:1;min-width:28px;height:48px;border-radius:6px;background:rgba(0,240,255,.08);border:1px solid var(--accent-soft);color:#e8faff;font-weight:700;font-size:14px;cursor:pointer;text-transform:uppercase;transition:.18s;user-select:none;font-family:inherit;letter-spacing:.5px;}
+.wKey:hover{background:rgba(0,240,255,.18);border-color:var(--accent);}
+.wKey.wide{flex:1.6;font-size:11px;letter-spacing:1px;}
+.wKey.correct{background:#3aa856;border-color:#3aa856;color:#fff;}
+.wKey.present{background:#c9a13a;border-color:#c9a13a;color:#fff;}
+.wKey.absent{background:#2b3540;border-color:#2b3540;color:#8b96a3;}
+#wordleBanner{min-height:38px;display:flex;align-items:center;justify-content:center;gap:14px;color:#e8faff;font-size:14px;letter-spacing:1.5px;flex-wrap:wrap;}
+#wordleBanner.win{color:#67d989;text-shadow:0 0 10px rgba(58,168,86,.55);}
+#wordleBanner.lose{color:#ff9a9a;text-shadow:0 0 10px rgba(255,107,107,.4);}
+#wordleBanner .word{color:var(--accent);letter-spacing:3px;text-transform:uppercase;font-weight:700;text-shadow:0 0 8px var(--accent-glow);}
+
+/* ---------- SLOPE 3D ---------- */
+#slopeBody{flex:1;position:relative;overflow:hidden;background:#000410;}
+#slopeCanvas{display:block;width:100%;height:100%;}
+#slopeHUD{position:absolute;top:14px;left:16px;color:var(--accent);font-family:inherit;letter-spacing:2px;font-size:13px;text-shadow:0 0 8px var(--accent-glow);pointer-events:none;line-height:1.6;}
+#slopeHUD .hLabel{opacity:.6;font-size:10px;letter-spacing:3px;}
+#slopeHUD .hVal{font-size:22px;color:#e8faff;text-shadow:0 0 10px var(--accent);}
+#slopeHint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#8ea9b5;font-size:11px;letter-spacing:2px;pointer-events:none;opacity:.75;text-align:center;}
+#slopeGameOver{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:rgba(0,8,20,.72);backdrop-filter:blur(6px);z-index:5;}
+#slopeGameOver.show{display:flex;}
+#slopeGameOver .goTitle{color:#ff6b6b;font-size:34px;letter-spacing:6px;text-shadow:0 0 18px rgba(255,107,107,.55);}
+#slopeGameOver .goScore{color:#e8faff;letter-spacing:2px;font-size:16px;}
+#slopeGameOver .goScore span{color:var(--accent);font-weight:700;}
+#slopeGameOver .goBtn{padding:12px 30px;background:rgba(0,240,255,.12);border:1px solid var(--accent);border-radius:10px;color:var(--accent);cursor:pointer;font-family:inherit;font-size:13px;letter-spacing:3px;transition:.2s;text-transform:uppercase;}
+#slopeGameOver .goBtn:hover{background:var(--accent-soft);box-shadow:0 0 22px var(--accent-glow);}
+        </style>
+        <!-- WORDLE OVERLAY -->
+         <div id="uuidMachine">4c894938-570c-4f98-9b0c-8d98e6988573</div>
+         <div id="uuidMachine">cfb49fd0-3bc8-4925-81e3-030e7f9f511a</div>
+    </head>
+    <body>
+        <div id="wordleOverlay" onclick="if(event.target.id==='wordleOverlay')closeWordle()" data-testid="wordle-overlay">
+  <div id="wordlePanel">
+    <div class="aiHead">
+      <div class="ttl"><span class="orb"></span>STREAM WORDLE <span style="opacity:.5;font-size:11px;letter-spacing:2px;">RANDOMISED</span></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="headBtn" onclick="wordleNew()" data-testid="wordle-new-btn">New Game</button>
+        <button class="closeX" onclick="closeWordle()" data-testid="wordle-close-btn">✕</button>
+      </div>
+    </div>
+    <div id="wordleBody">
+      <div id="wordleGrid" data-testid="wordle-grid"></div>
+      <div id="wordleBanner" data-testid="wordle-banner"></div>
+      <div id="wordleKeyboard" data-testid="wordle-keyboard"></div>
+    </div>
+  </div>
+</div>
+<!-- SLOPE 3D OVERLAY -->
+ <div id="slopeOverlay" onclick="if(event.target.id==='slopeOverlay')closeSlope3D()" data-testid="slope-overlay">
+  <div id="slopePanel">
+    <div class="aiHead">
+      <div class="ttl"><span class="orb"></span>SLOPE 3D <span style="opacity:.5;font-size:11px;letter-spacing:2px;">DESCENT</span></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="headBtn" onclick="slopeRestart()" data-testid="slope-restart-btn">Restart</button>
+        <button class="closeX" onclick="closeSlope3D()" data-testid="slope-close-btn">✕</button>
+      </div>
+    </div>
+    <div id="slopeBody">
+      <canvas id="slopeCanvas" data-testid="slope-canvas"></canvas>
+      <div id="slopeHUD">
+        <div class="hLabel">SCORE</div>
+        <div class="hVal" id="slopeScore">0</div>
+        <div class="hLabel" style="margin-top:6px;">SPEED</div>
+        <div class="hVal" id="slopeSpeed">1.0×</div>
+      </div>
+      <div id="slopeHint">A / D  or  ← / →  to steer</div>
+      <div id="slopeGameOver" data-testid="slope-gameover">
+        <div class="goTitle">GAME OVER</div>
+        <div class="goScore">Distance: <span id="slopeFinalScore">0</span></div>
+        <button class="goBtn" onclick="slopeRestart()" data-testid="slope-play-again">Play Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    
+/* ============================================================
+   WORDLE — self-contained, randomised each open
+   ============================================================ */
+const WORDLE_WORDS = 'aback abase abate abbey abbot abhor abide abled abode abort about above abuse abyss acorn acrid actor acute adage adapt adept admin admit adobe adopt adore adorn adult affix afire afoot afoul after again agape agate agent agile aging aglow agony agora agree ahead aider aisle alarm album alert algae alibi alien align alike alive allay alley allot allow alloy aloft alone along aloof aloud alpha altar alter amass amaze amber amble amend amiss amity among ample amply amuse angel anger angle angry angst anime ankle annex annoy annul anode antic anvil aorta apart aphid aping apnea apple apply apron aptly arbor ardor arena argue arise armor aroma arose array arrow arson artsy ascot ashen aside askew assay asset atoll atone attic audio audit augur aunty avail avert avian avoid await awake award aware awash awful awoke axial axiom axion azure bacon badge badly bagel baggy baker baler balmy banal banjo barge baron basal basic basil basin basis baste batch bathe baton batty bawdy bayou beach beady beard beast beech beefy befit began begat beget begin begun being belch belie belle belly below bench beret berry berth beset betel bevel bezel bible bicep biddy bigot bilge billy binge bingo biome birch birth bison bitty black blade blame bland blank blare blast blaze bleak bleat bleed bleep blend bless blimp blind blink bliss blitz bloat block bloke blond blood bloom blown bluer bluff blunt blurb blurt blush board boast bobby boney bongo bonus booby boost booth booty booze boozy borax borne bosom bossy botch bough boule bound bowel boxer brace braid brain brake brand brash brass brave bravo brawl brawn bread break breed briar bribe brick bride brief brine bring brink briny brisk broad broil broke brood brook broom broth brown brunt brush brute buddy budge buggy bugle build built bulge bulky bully bunch bunny burly burnt burst bused bushy butch butte buxom buyer bylaw cabal cabby cabin cable cacao cache cacti caddy cadet cagey cairn camel cameo canal candy canny canoe canon caper caput carat cargo carol carry carve caste catch cater catty caulk cause cavil cease cedar cello chafe chaff chain chair chalk champ chant chaos chard charm chart chase chasm cheap cheat check cheek cheer chess chest chick chide chief child chili chill chime china chirp chock choir choke chord chore chose chuck chump chunk churn chute cider cigar cinch circa civic civil clack claim clamp clang clank clash clasp class clean clear cleat cleft clerk click cliff climb cling clink cloak clock clone close cloth cloud clout clove clown cluck clued clump clung coach coast cobra cocoa colon color comet comfy comic comma conch condo conic copse coral corer corny couch cough could count coupe court coven cover covet covey cower coyly crack craft cramp crane crank crash crass crate crave crawl craze crazy creak cream credo creed creek creep creme crepe crept cress crest crick cried crier crime crimp crisp croak crock crone crony crook cross croup crowd crown crude cruel crumb crump crush crust crypt cubic cumin curio curly curry curse curve curvy cutie cyber cycle cynic daddy daily dairy daisy dally dance dandy datum daunt dealt death debar debit debug debut decal decay decor decoy decry defer deign deity delay delta delve demon demur denim dense depot depth derby deter detox deuce devil diary dicey digit dilly dimly diner dingo dingy diode dirge dirty disco ditch ditto ditty diver dizzy dodge dodgy dogma doing dolly donor donut dopey doubt dough dowdy dowel downy dowry dozen draft drain drake drama drank drape drawl drawn dread dream dress dried drier drift drill drink drive droit droll drone drool droop dross drove drown druid drunk dryer dryly duchy dully dummy dumpy dunce dusky dusty dutch duvet dwarf dwell dwelt dying eager eagle early earth easel eaten eater ebony eclat edict edify eerie egret eight eject eking elate elbow elder elect elegy elfin elide elite elope elude email embed ember emcee empty enact endow enema enemy enjoy ennui ensue enter entry envoy epoch epoxy equal equip erase erect erode error erupt essay ester ether ethic ethos etude evade event every evict evoke exact exalt excel exert exile exist expel extol extra exult eying fable facet faint fairy faith false fancy fanny farce fatal fatty fault fauna favor feast fecal feign fella felon femme femur fence feral ferry fetal fetch fetid fetus fever fewer fiber fibre ficus field fiend fiery fifth fifty fight filer filet filly filmy filth final finch finer first fishy fixer fizzy fjord flack flail flair flake flaky flame flank flare flash flask fleck fleet flesh flick flier fling flint flirt float flock flood floor flora floss flour flout flown fluff fluid fluke flume flung flunk flush flute flyer foamy focal focus foggy foist folio folly foray force forge forgo forte forth forty forum found foyer frail frame frank fraud freak freed freer fresh friar fried frill frisk fritz frock frond front frost froth frown froze fruit fudge fugue fully fungi funky funny furor furry fussy fuzzy gaffe gaily gamer gamma gamut gassy gaudy gauge gaunt gauze gavel gawky gayer gayly gazer gecko geeky geese genie genre ghost ghoul giant giddy gipsy girly girth given giver glade gland glare glass glaze gleam glean glide glint gloat globe gloom glory gloss glove glyph gnash gnome godly going golem golly gonad goner goody gooey goofy goose gorge gouge gourd grace grade graft grail grain grand grant grape graph grasp grass grate grave gravy graze great greed green greet grief grill grime grimy grind gripe groan groin groom grope gross group grout grove growl grown gruel gruff grunt guard guava guess guest guide guild guile guilt guise gulch gully gumbo gummy guppy gusto gusty gypsy habit hairy halve handy happy hardy harem harpy harry harsh haste hasty hatch hater haunt haute haven havoc hazel heady heard heart heath heave heavy hedge hefty heist helix hello hence heron hilly hinge hippo hippy hitch hoard hobby hoist holly homer honey honor horde horny horse hotel hotly hound house hovel hover howdy human humid humor humph humus hunch hunky hurry husky hussy hutch hydro hyena hymen hyper icily icing ideal idiom idiot idler idyll igloo iliac image imbue impel imply inane inbox incur index inept inert infer ingot inlay inlet inner input inter intro ionic irate irony islet issue itchy ivory jaunt jazzy jelly jerky jetty jewel jiffy joint joist joker jolly joust judge juice juicy jumbo jumpy junta junto juror kappa karma kayak kebab khaki kinky kiosk kitty knack knave knead kneed kneel knelt knife knock knoll known koala krill label labor laden ladle lager lance lanky lapel lapse large larva lasso latch later lathe latte laugh layer leach leafy leaky leant leapt learn lease leash least leave ledge leech leery lefty legal leggy lemon lemur leper level lever libel liege light liken lilac limbo limit linen liner lingo lipid lithe liver livid llama loamy loath lobby local locus lodge lofty logic login loopy loose lorry loser louse lousy lover lower lowly loyal lucid lucky lumen lumpy lunar lunch lunge lupus lurch lurid lusty lying lymph lynch lyric macaw macho macro madam madly mafia magic magma maize major maker mambo mamma mammy manga mange mango mangy mania manic manly manor maple march marry marsh mason masse match matey mauve maxim maybe mayor mealy meant meaty mecca medal media medic melee melon mercy merge merit merry metal meter metro micro midge midst might milky mimic mince miner minim minor minty minus mirth miser missy mocha modal model modem mogul moist molar moldy money month moody moose moral moron morph mossy motel motif motor motto moult mound mount mourn mouse mouth mover movie mower mucky mucus muddy mulch mummy munch mural murky mushy music musky musty myrrh nadir naive nanny nasal nasty natal naval navel needy neigh nerdy nerve never newer newly nicer niche niece night ninja ninny ninth noble nobly noise noisy nomad noose north nosey notch novel nudge nurse nutty nylon nymph oaken obese occur ocean octal octet odder oddly offal offer often olden older olive ombre omega onion onset opera opine opium optic orbit order organ other otter ought ounce outdo outer outgo ovary ovate overt ovine ovoid owing owner oxide ozone paddy pagan paint paler palsy panel panic pansy papal paper parer parka parry parse party pasta paste pasty patch patio patsy patty pause payee payer peace peach pearl pecan pedal penal pence penne penny perch peril perky pesky pesto petal petty phase phone phony photo piano picky piece piety piggy pilot pinch piney pinky pinto piper pique pitch pithy pivot pixel pixie pizza place plaid plain plait plane plank plant plate plaza plead pleat plied plier pluck plumb plume plump plunk plush poesy point poise poker polar polka polyp pooch poppy porch poser posit posse pouch pound pouty power prank prawn preen press price prick pride pried prime primo print prior prism privy prize probe prone prong proof prose proud prove prowl proxy prude prune psalm pubic pudgy puffy pulpy pulse punch pupal pupil puppy puree purer purge purse pushy putty pygmy quack quail quake qualm quark quart quash quasi queen queer quell query quest queue quick quiet quill quilt quirk quite quota quote quoth rabbi rabid racer radar radii radio rainy raise rajah rally ralph ramen ranch randy range rapid rarer raspy ratio ratty raven rayon razor reach react ready realm rearm rebar rebel rebus rebut recap recur recut reedy refer refit regal rehab reign relax relay relic remit renal renew repay repel reply rerun reset resin retch retro retry reuse revel revue rhino rhyme rider ridge rifle right rigid rigor rinse ripen riper risen riser risky rival river rivet roach roast robin robot rocky rodeo roger rogue roomy roost rotor rouge rough round rouse route rover rowdy rower royal ruddy ruder rugby ruler rumba rumor rupee rural rusty sadly safer saint salad sally salon salsa salty salve salvo sandy saner sappy sassy satin satyr sauce saucy sauna saute savor savoy savvy scald scale scalp scaly scamp scant scare scarf scary scene scent scion scoff scold scone scoop scope score scorn scour scout scowl scram scrap scree screw scrub scrum scuba sedan seedy segue seize semen sense sepia serif serum serve setup seven sever sewer shack shade shady shaft shake shaky shale shall shalt shame shank shape shard share shark sharp shave shawl shear sheen sheep sheer sheet sheik shelf shell shied shift shine shiny shire shirk shirt shoal shock shone shook shoot shore shorn short shout shove shown showy shrew shrub shrug shuck shunt shush shyly siege sieve sight sigma silky silly since sinew singe siren sissy sixth sixty skate skier skiff skill skimp skirt skulk skull skunk slack slain slang slant slash slate slave sleek sleep sleet slept slice slick slide slime slimy sling slink sloop slope slosh sloth slump slung slunk slurp slush slyly smack small smart smash smear smell smelt smile smirk smite smith smock smoke smoky smote snack snail snake snaky snare snarl sneak sneer snide sniff snipe snoop snore snort snout snowy snuck snuff soapy sober soggy solar solid solve sonar sonic sooth sooty sorry sound south sower space spade spank spare spark spasm spawn speak spear speck speed spell spelt spend spent sperm spice spicy spied spiel spike spiky spill spilt spine spiny spire spite splat split spoil spoke spoof spook spool spoon spore sport spout spray spree sprig spunk spurn spurt squad squat squib stack staff stage staid stain stair stake stale stalk stall stamp stand stank stare stark start stash state stave stead steak steal steam steed steel steep steer stein stern stick stiff still stilt sting stink stint stock stoic stoke stole stomp stone stony stood stool stoop store stork storm story stout stove strap straw stray strip strut stuck study stuff stump stung stunk stunt style suave sugar suing suite sulky sully sumac sunny super surer surge surly sushi swami swamp swarm swash swath swear sweat sweep sweet swell swept swift swill swine swing swirl swish swoon swoop sword swore sworn swung synod syrup tabby table taboo tacit tacky taffy taint taken taker tally talon tamer tango tangy taper tapir tardy tarot taste tasty tatty taunt tawny teach teary tease teddy teeth tempo tenet tenor tense tenth tepee tepid terra terse testy thank theft their theme there these theta thick thief thigh thing think third thong thorn those three threw throb throw thrum thumb thump thyme tiara tibia tidal tiger tight tilde timer timid tipsy titan tithe title toast today toddy token tonal tonga tonic tooth topaz topic torch torso torus total totem touch tough towel tower toxic toxin trace track tract trade trail train trait tramp trash trawl tread treat trend triad trial tribe trice trick tried tripe trite troll troop trope trout trove truce truck truer truly trump trunk truss trust truth tryst tubal tuber tulip tulle tumor tunic turbo tutor twang tweak tweed tweet twice twine twirl twist twixt tying udder ulcer ultra umbra uncle uncut under undid undue unfed unfit unify union unite unity unlit unmet unset untie until unwed unzip upper upset urban urine usage usher using usual usurp utile utter vague valet valid valor value valve vapid vapor vault vaunt vegan venom venue verge verse verso verve vicar video vigil vigor villa vinyl viola viper viral virus visit visor vista vital vivid vixen vocal vodka vogue voice voila vomit voter vouch vowel vying wacky wafer wager wagon waist waive waltz warty waste watch water waver waxen weary weave wedge weedy weigh weird welch welsh wench whack whale wharf wheat wheel whelp where which whiff while whine whiny whirl whisk white whole whoop whose widen wider widow width wield wight willy wimpy wince winch windy wiser wispy witch witty woken woman women woody wooer wooly woozy wordy world worry worse worst worth would wound woven wrack wrath wreak wreck wrest wring wrist write wrong wrote wrung wryly yacht yearn yeast yield young youth zebra zesty zonal'.split(' ');
+
+const WORDLE_STATE = {row:0,col:0,answer:'',guesses:[],done:false};
+
+function openWordle(){
+  document.getElementById('wordleOverlay').classList.add('show');
+  wordleNew();
+}
+function closeWordle(){
+  document.getElementById('wordleOverlay').classList.remove('show');
+  // reset state so reopening is fresh
+  WORDLE_STATE.done = true;
+}
+function wordleNew(){
+  WORDLE_STATE.answer = WORDLE_WORDS[Math.floor(Math.random()*WORDLE_WORDS.length)].toUpperCase();
+  WORDLE_STATE.row = 0; WORDLE_STATE.col = 0;
+  WORDLE_STATE.guesses = [];
+  WORDLE_STATE.done = false;
+  wordleRenderGrid();
+  wordleRenderKeyboard();
+  document.getElementById('wordleBanner').textContent = '';
+  document.getElementById('wordleBanner').className = '';
+}
+function wordleRenderGrid(){
+  const grid = document.getElementById('wordleGrid');
+  let h = '';
+  for(let r=0;r<6;r++){
+    h += '<div class="wRow" data-row="'+r+'">';
+    for(let c=0;c<5;c++) h += '<div class="wCell" data-r="'+r+'" data-c="'+c+'"></div>';
+    h += '</div>';
+  }
+  grid.innerHTML = h;
+}
+function wordleRenderKeyboard(){
+  const rows = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+  const kb = document.getElementById('wordleKeyboard');
+  let h = '';
+  rows.forEach((row,ri)=>{
+    h += '<div class="wkRow">';
+    if(ri===2) h += '<button class="wKey wide" data-k="ENTER" onclick="wordleKey(\'ENTER\')">Enter</button>';
+    for(const ch of row) h += '<button class="wKey" data-k="'+ch+'" onclick="wordleKey(\''+ch+'\')">'+ch+'</button>';
+    if(ri===2) h += '<button class="wKey wide" data-k="BACK" onclick="wordleKey(\'BACK\')">⌫</button>';
+    h += '</div>';
+  });
+  kb.innerHTML = h;
+}
+function wordleCell(r,c){ return document.querySelector('.wCell[data-r="'+r+'"][data-c="'+c+'"]'); }
+function wordleKey(k){
+  if(WORDLE_STATE.done) return;
+  if(k==='ENTER'){ wordleSubmit(); return; }
+  if(k==='BACK'){
+    if(WORDLE_STATE.col>0){
+      WORDLE_STATE.col--;
+      const cell = wordleCell(WORDLE_STATE.row, WORDLE_STATE.col);
+      cell.textContent=''; cell.classList.remove('filled');
+    }
+    return;
+  }
+  if(!/^[A-Z]$/.test(k)) return;
+  if(WORDLE_STATE.col>=5) return;
+  const cell = wordleCell(WORDLE_STATE.row, WORDLE_STATE.col);
+  cell.textContent = k;
+  cell.classList.add('filled');
+  WORDLE_STATE.col++;
+}
+function wordleSubmit(){
+  if(WORDLE_STATE.col<5){
+    const row = document.querySelector('.wRow[data-row="'+WORDLE_STATE.row+'"]');
+    row.classList.remove('shake'); void row.offsetWidth; row.classList.add('shake');
+    return;
+  }
+  const guess = Array.from({length:5},(_,i)=>wordleCell(WORDLE_STATE.row,i).textContent).join('');
+  const ans = WORDLE_STATE.answer;
+  // classify with double-letter handling
+  const result = new Array(5).fill('absent');
+  const counts = {};
+  for(const ch of ans) counts[ch] = (counts[ch]||0)+1;
+  for(let i=0;i<5;i++){ if(guess[i]===ans[i]){ result[i]='correct'; counts[guess[i]]--; } }
+  for(let i=0;i<5;i++){
+    if(result[i]==='correct') continue;
+    if(counts[guess[i]]>0){ result[i]='present'; counts[guess[i]]--; }
+  }
+  // animate flip + apply colours staggered
+  for(let i=0;i<5;i++){
+    const cell = wordleCell(WORDLE_STATE.row,i);
+    setTimeout(()=>{
+      cell.classList.add('flip');
+      setTimeout(()=>{ cell.classList.add(result[i]); },260);
+    }, i*140);
+  }
+  // update on-screen keyboard colours after animation
+  setTimeout(()=>{
+    for(let i=0;i<5;i++){
+      const btn = document.querySelector('.wKey[data-k="'+guess[i]+'"]');
+      if(!btn) continue;
+      const cur = btn.classList.contains('correct') ? 'correct' :
+                  btn.classList.contains('present') ? 'present' :
+                  btn.classList.contains('absent')  ? 'absent'  : '';
+      const rank = {'':0,'absent':1,'present':2,'correct':3};
+      if(rank[result[i]] > rank[cur]){
+        btn.classList.remove('correct','present','absent');
+        btn.classList.add(result[i]);
+      }
+    }
+  }, 5*140 + 260);
+  WORDLE_STATE.row++;
+  WORDLE_STATE.col = 0;
+  const banner = document.getElementById('wordleBanner');
+  const finishDelay = 5*140 + 400;
+  if(guess === ans){
+    WORDLE_STATE.done = true;
+    setTimeout(()=>{
+      banner.className = 'win';
+      banner.innerHTML = '★ solved in '+WORDLE_STATE.row+' — <span class="word">'+ans+'</span>';
+    }, finishDelay);
+  } else if(WORDLE_STATE.row>=6){
+    WORDLE_STATE.done = true;
+    setTimeout(()=>{
+      banner.className = 'lose';
+      banner.innerHTML = 'the word was <span class="word">'+ans+'</span>';
+    }, finishDelay);
+  }
+}
+// Physical keyboard while Wordle open
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('wordleOverlay').classList.contains('show')) return;
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.key === 'Escape'){ closeWordle(); return; }
+  if(e.key === 'Enter'){ wordleKey('ENTER'); e.preventDefault(); return; }
+  if(e.key === 'Backspace'){ wordleKey('BACK'); e.preventDefault(); return; }
+  const k = e.key.toUpperCase();
+  if(/^[A-Z]$/.test(k)){ wordleKey(k); e.preventDefault(); }
+});
+
+/* ============================================================
+   SLOPE 3D — procedurally generated, Three.js via CDN
+   ============================================================ */
+const SLOPE = {
+  loaded:false, loading:false, THREE:null,
+  scene:null, camera:null, renderer:null, raf:null,
+  player:null, playerVX:0, playerX:0,
+  segments:[], obstacles:[], gaps:[],
+  distance:0, speed:0.55, baseSpeed:0.55,
+  keys:{left:false,right:false},
+  running:false, resizeObs:null,
+  lastSpawnZ:0,
+};
+
+function openSlope3D(){
+  document.getElementById('slopeOverlay').classList.add('show');
+  slopeEnsureLoaded().then(() => {
+    slopeInit();
+    slopeStart();
+  });
+}
+function closeSlope3D(){
+  document.getElementById('slopeOverlay').classList.remove('show');
+  slopeStop();
+  slopeDispose();
+}
+function slopeEnsureLoaded(){
+  if(SLOPE.loaded) return Promise.resolve();
+  if(SLOPE.loading) return SLOPE.loading;
+  SLOPE.loading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
+    s.onload = () => { SLOPE.THREE = window.THREE; SLOPE.loaded = true; resolve(); };
+    s.onerror = () => { SLOPE.loading = null; reject(new Error('three.js failed to load')); };
+    document.head.appendChild(s);
+  });
+  return SLOPE.loading;
+}
+
+function slopeInit(){
+  const THREE = SLOPE.THREE;
+  const canvas = document.getElementById('slopeCanvas');
+  const body = document.getElementById('slopeBody');
+  const w = body.clientWidth, h = body.clientHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000814);
+  scene.fog = new THREE.Fog(0x000814, 22, 70);
+
+  const camera = new THREE.PerspectiveCamera(70, w/h, 0.1, 200);
+  camera.position.set(0, 3.2, 6);
+  camera.lookAt(0, 1.2, -8);
+
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(w, h, false);
+
+  // lights
+  const amb = new THREE.AmbientLight(0x88bbff, 0.35);
+  scene.add(amb);
+  const key = new THREE.DirectionalLight(0x00f0ff, 0.9);
+  key.position.set(4, 10, 4);
+  scene.add(key);
+  const fill = new THREE.PointLight(0xff3355, 0.9, 24);
+  fill.position.set(0, 3, 4);
+  scene.add(fill);
+
+  // Player — red glossy sphere
+  const playerGeo = new THREE.SphereGeometry(0.55, 32, 24);
+  const playerMat = new THREE.MeshStandardMaterial({
+    color:0xff2244, metalness:0.55, roughness:0.22,
+    emissive:0x330008, emissiveIntensity:0.55,
+  });
+  const player = new THREE.Mesh(playerGeo, playerMat);
+  player.position.set(0, 0.9, 0);
+  scene.add(player);
+
+  SLOPE.scene = scene;
+  SLOPE.camera = camera;
+  SLOPE.renderer = renderer;
+  SLOPE.player = player;
+  SLOPE.playerX = 0;
+  SLOPE.playerVX = 0;
+  SLOPE.segments = [];
+  SLOPE.obstacles = [];
+  SLOPE.gaps = [];
+  SLOPE.distance = 0;
+  SLOPE.speed = SLOPE.baseSpeed;
+  SLOPE.lastSpawnZ = -6;
+
+  // Spawn initial slope segments
+  for(let i=0;i<24;i++) slopeSpawnSegment(-i*4);
+
+  // resize handling
+  SLOPE._onResize = () => {
+    const nw = body.clientWidth, nh = body.clientHeight;
+    renderer.setSize(nw, nh, false);
+    camera.aspect = nw/nh; camera.updateProjectionMatrix();
+  };
+  window.addEventListener('resize', SLOPE._onResize);
+
+  // key handling (scoped to overlay)
+  SLOPE._onKeyDown = e => {
+    if(!document.getElementById('slopeOverlay').classList.contains('show')) return;
+    if(e.key === 'Escape'){ closeSlope3D(); return; }
+    if(e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft'){ SLOPE.keys.left = true; e.preventDefault(); }
+    if(e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight'){ SLOPE.keys.right = true; e.preventDefault(); }
+  };
+  SLOPE._onKeyUp = e => {
+    if(e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') SLOPE.keys.left = false;
+    if(e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') SLOPE.keys.right = false;
+  };
+  window.addEventListener('keydown', SLOPE._onKeyDown);
+  window.addEventListener('keyup', SLOPE._onKeyUp);
+
+  document.getElementById('slopeGameOver').classList.remove('show');
+  document.getElementById('slopeScore').textContent = '0';
+  document.getElementById('slopeSpeed').textContent = '1.0×';
+}
+
+function slopeSpawnSegment(z){
+  const THREE = SLOPE.THREE;
+  const isGap = Math.random() < 0.10 && z < -12;
+  const floorGeo = new THREE.BoxGeometry(8, 0.4, 4);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: isGap ? 0xffcc22 : 0x0a1a2e,
+    emissive: isGap ? 0x664400 : 0x001428,
+    emissiveIntensity: isGap ? 0.7 : 0.25,
+    metalness: 0.25, roughness: 0.75,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.position.set(0, 0, z);
+  SLOPE.scene.add(floor);
+  floor.userData.isGap = isGap;
+  SLOPE.segments.push(floor);
+
+  // side walls (neon)
+  const wallGeo = new THREE.BoxGeometry(0.3, 1.6, 4);
+  const wallMat = new THREE.MeshStandardMaterial({color:0x00f0ff, emissive:0x00b4c4, emissiveIntensity:1.2, metalness:0.6, roughness:0.2});
+  const wallL = new THREE.Mesh(wallGeo, wallMat.clone());
+  wallL.position.set(-4.15, 0.8, z);
+  const wallR = new THREE.Mesh(wallGeo, wallMat.clone());
+  wallR.position.set(4.15, 0.8, z);
+  SLOPE.scene.add(wallL); SLOPE.scene.add(wallR);
+  floor.userData.walls = [wallL, wallR];
+
+  // Random obstacle blocks (not on gaps)
+  if(!isGap && z < -14 && Math.random() < 0.55){
+    const count = 1 + (Math.random()<0.25 ? 1 : 0);
+    for(let i=0;i<count;i++){
+      const oGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+      const oMat = new THREE.MeshStandardMaterial({color:0xff2244, emissive:0x550011, emissiveIntensity:0.9, metalness:0.5, roughness:0.3});
+      const obs = new THREE.Mesh(oGeo, oMat);
+      obs.position.set(-3 + Math.random()*6, 0.8, z + (Math.random()-0.5)*3);
+      SLOPE.scene.add(obs);
+      SLOPE.obstacles.push(obs);
+      floor.userData.obstacles = floor.userData.obstacles || [];
+      floor.userData.obstacles.push(obs);
+    }
+  }
+  SLOPE.lastSpawnZ = Math.min(SLOPE.lastSpawnZ, z);
+}
+
+function slopeStart(){
+  SLOPE.running = true;
+  const loop = () => {
+    if(!SLOPE.running) return;
+    slopeStep();
+    SLOPE.renderer.render(SLOPE.scene, SLOPE.camera);
+    SLOPE.raf = requestAnimationFrame(loop);
+  };
+  loop();
+}
+function slopeStop(){
+  SLOPE.running = false;
+  if(SLOPE.raf){ cancelAnimationFrame(SLOPE.raf); SLOPE.raf = null; }
+}
+
+function slopeStep(){
+  // physics
+  SLOPE.speed = SLOPE.baseSpeed + Math.min(SLOPE.distance * 0.0015, 0.9);
+  const dt = SLOPE.speed;
+  // steering
+  const accel = 0.06;
+  if(SLOPE.keys.left)  SLOPE.playerVX -= accel;
+  if(SLOPE.keys.right) SLOPE.playerVX += accel;
+  if(!SLOPE.keys.left && !SLOPE.keys.right) SLOPE.playerVX *= 0.86;
+  SLOPE.playerVX = Math.max(-0.28, Math.min(0.28, SLOPE.playerVX));
+  SLOPE.playerX += SLOPE.playerVX;
+  // clamp inside walls
+  if(SLOPE.playerX < -3.6){ SLOPE.playerX = -3.6; SLOPE.playerVX = 0; }
+  if(SLOPE.playerX >  3.6){ SLOPE.playerX =  3.6; SLOPE.playerVX = 0; }
+  SLOPE.player.position.x = SLOPE.playerX;
+  // spin
+  SLOPE.player.rotation.z -= SLOPE.playerVX * 0.4;
+  SLOPE.player.rotation.x -= dt * 0.4;
+
+  // move the world toward the camera
+  for(const seg of SLOPE.segments){
+    seg.position.z += dt;
+    if(seg.userData.walls){ seg.userData.walls[0].position.z += dt; seg.userData.walls[1].position.z += dt; }
+  }
+  for(const obs of SLOPE.obstacles) obs.position.z += dt;
+
+  // recycle offscreen segments
+  const toRemove = [];
+  for(const seg of SLOPE.segments){
+    if(seg.position.z > 10){
+      // remove walls + obstacles associated
+      if(seg.userData.walls){
+        seg.userData.walls.forEach(w => { SLOPE.scene.remove(w); w.geometry.dispose(); w.material.dispose(); });
+      }
+      if(seg.userData.obstacles){
+        seg.userData.obstacles.forEach(o => {
+          SLOPE.scene.remove(o); o.geometry.dispose(); o.material.dispose();
+          const idx = SLOPE.obstacles.indexOf(o); if(idx>=0) SLOPE.obstacles.splice(idx,1);
+        });
+      }
+      SLOPE.scene.remove(seg); seg.geometry.dispose(); seg.material.dispose();
+      toRemove.push(seg);
+    }
+  }
+  for(const seg of toRemove){ const i = SLOPE.segments.indexOf(seg); if(i>=0) SLOPE.segments.splice(i,1); }
+  // spawn new ones ahead
+  while(SLOPE.lastSpawnZ > -90){ slopeSpawnSegment(SLOPE.lastSpawnZ - 4); }
+
+  // score
+  SLOPE.distance += dt;
+  document.getElementById('slopeScore').textContent = Math.floor(SLOPE.distance);
+  document.getElementById('slopeSpeed').textContent = (SLOPE.speed / SLOPE.baseSpeed).toFixed(1) + '×';
+
+  // collisions with obstacles
+  for(const obs of SLOPE.obstacles){
+    if(Math.abs(obs.position.z - SLOPE.player.position.z) < 0.9 &&
+       Math.abs(obs.position.x - SLOPE.player.position.x) < 0.9){
+      return slopeGameOver();
+    }
+  }
+  // fall through gap: any segment near the player that is a gap
+  for(const seg of SLOPE.segments){
+    if(seg.userData.isGap && Math.abs(seg.position.z - SLOPE.player.position.z) < 1.6){
+      // if the player is on the gap tile
+      return slopeGameOver();
+    }
+  }
+}
+
+function slopeGameOver(){
+  slopeStop();
+  document.getElementById('slopeFinalScore').textContent = Math.floor(SLOPE.distance);
+  document.getElementById('slopeGameOver').classList.add('show');
+}
+function slopeRestart(){
+  slopeStop();
+  slopeDispose();
+  slopeInit();
+  slopeStart();
+}
+function slopeDispose(){
+  if(SLOPE._onResize) window.removeEventListener('resize', SLOPE._onResize);
+  if(SLOPE._onKeyDown) window.removeEventListener('keydown', SLOPE._onKeyDown);
+  if(SLOPE._onKeyUp) window.removeEventListener('keyup', SLOPE._onKeyUp);
+  if(SLOPE.scene){
+    // dispose everything
+    SLOPE.scene.traverse(o => {
+      if(o.geometry) o.geometry.dispose();
+      if(o.material){
+        if(Array.isArray(o.material)) o.material.forEach(m=>m.dispose());
+        else o.material.dispose();
+      }
+    });
+  }
+  if(SLOPE.renderer){ SLOPE.renderer.dispose && SLOPE.renderer.dispose(); }
+  SLOPE.scene = null; SLOPE.camera = null; SLOPE.renderer = null;
+  SLOPE.player = null; SLOPE.segments = []; SLOPE.obstacles = [];
+}
+
+// ESC handlers (extra safety – key handlers above also cover this)
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(document.getElementById('slopeOverlay').classList.contains('show')) closeSlope3D();
+});
+
+// Wire into the existing Ctrl+K command palette
+if(typeof commands !== 'undefined'){
+  commands.push({label:'🟩 Wordle', kbd:'', run:openWordle});
+  commands.push({label:'🎿 Slope 3D', kbd:'', run:openSlope3D});
+}
+</script>
+<!-- ================= END STREAM WORDLE + SLOPE 3D ================= -->
+ <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;7f7b0fd8732c4326aae4b9d58d5c514a&quot;}" crossorigin="anonymous"></script>
+    </body>
+</html>
 </body>
 </html>

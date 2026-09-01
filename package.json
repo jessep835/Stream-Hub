@@ -1,6 +1,6 @@
 {
   "name": "stream",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "main": "mainstream.js",
   "description": "Stream Hub",
   "author": "Jesse Penman",
